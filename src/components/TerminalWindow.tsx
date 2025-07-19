@@ -8,13 +8,30 @@ interface TerminalLine {
   timestamp: Date;
 }
 
+// Package database simulation
+const PACKAGES_DB = {
+  'curl': { version: '7.88.1', description: 'command line tool for transferring data', installed: true },
+  'git': { version: '2.39.2', description: 'fast, scalable, distributed revision control system', installed: true },
+  'vim': { version: '9.0.1000', description: 'Vi IMproved - enhanced vi editor', installed: true },
+  'python3': { version: '3.11.7', description: 'interactive high-level object-oriented language', installed: true },
+  'nodejs': { version: '18.19.0', description: 'evented I/O for V8 javascript', installed: false },
+  'docker.io': { version: '24.0.7', description: 'Linux container runtime', installed: false },
+  'nginx': { version: '1.22.1', description: 'small, powerful, scalable web/proxy server', installed: false },
+  'postgresql': { version: '15.4', description: 'object-relational SQL database', installed: false },
+  'redis': { version: '7.0.12', description: 'persistent key-value database', installed: false },
+  'htop': { version: '3.2.2', description: 'interactive processes viewer', installed: true },
+  'neofetch': { version: '7.1.0', description: 'fast, highly customizable system info script', installed: true },
+  'tmux': { version: '3.3a', description: 'terminal multiplexer', installed: false },
+  'zsh': { version: '5.9', description: 'shell designed for interactive use', installed: false },
+};
+
 const DEMO_COMMANDS = [
   { command: "neofetch", output: "CVJ Terminal OS v1.0\nKernel: Android 13\nCPU: Snapdragon 8 Gen 2\nMemory: 12GB LPDDR5\nStorage: 512GB UFS 4.0" },
+  { command: "apt update", output: "Hit:1 http://deb.debian.org/debian bookworm InRelease\nReading package lists... Done\nBuilding dependency tree... Done" },
+  { command: "apt search nodejs", output: "nodejs/stable 18.19.0-1 arm64\n  evented I/O for V8 javascript - runtime executable" },
+  { command: "git clone https://github.com/user/repo", output: "Cloning into 'repo'...\nremote: Enumerating objects: 247, done.\nremote: Total 247 (delta 0), reused 0 (delta 0)\nReceiving objects: 100% (247/247), done." },
   { command: "ls -la", output: "drwxr-xr-x 8 cvj cvj  4096 Dec 18 14:30 .\ndrwxr-xr-x 3 cvj cvj  4096 Dec 18 14:30 ..\n-rw-r--r-- 1 cvj cvj   220 Dec 18 14:30 .bashrc\ndrwxr-xr-x 2 cvj cvj  4096 Dec 18 14:30 scripts\ndrwxr-xr-x 2 cvj cvj  4096 Dec 18 14:30 tools" },
-  { command: "python3 --version", output: "Python 3.11.7" },
-  { command: "git status", output: "On branch main\nYour branch is up to date with 'origin/main'.\n\nnothing to commit, working tree clean" },
   { command: "docker ps", output: "CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES" },
-  { command: "htop", output: "CVJ Terminal OS - Real-time system monitor loaded" },
 ];
 
 export function TerminalWindow() {
@@ -99,13 +116,21 @@ export function TerminalWindow() {
                '💾 SYSTEM INFO:\n  neofetch, uname, whoami, id, uptime, hostname, lscpu, lsmem, free, df\n' +
                '🔧 HARDWARE:\n  lsblk, fdisk, lsusb, lspci, dmidecode, sensors, lshw\n' +
                '🌐 NETWORKING:\n  ping, wget, curl, netstat, ss, iptables, nmap, traceroute, dig, nslookup\n' +
-               '📦 ARCHIVES:\n  tar, zip, unzip, gzip, gunzip, bzip2, bunzip2, 7z\n' +
+               '📦 PACKAGE MANAGERS:\n  apt, apt-get, dpkg, snap, flatpak, pip, npm, yarn, cargo\n' +
+               '🔄 GITHUB INTEGRATION:\n  git clone, git pull, git push, gh repo clone, gh release download\n' +
+               '📚 ARCHIVES:\n  tar, zip, unzip, gzip, gunzip, bzip2, bunzip2, 7z\n' +
                '👨‍💻 DEVELOPMENT:\n  git, python3, node, npm, pip, gcc, make, cmake, docker, kubernetes\n' +
                '✏️  EDITORS:\n  vim, nano, emacs, gedit\n' +
                '🛠️  UTILITIES:\n  echo, date, cal, bc, history, alias, which, type, man, info\n' +
                '🔒 SECURITY:\n  sudo, su, passwd, ssh, scp, rsync, gpg\n' +
                '📊 MONITORING:\n  watch, iostat, vmstat, sar, dmesg, journalctl\n' +
-               '🎯 TERMINAL:\n  clear, exit, logout, screen, tmux, bash, zsh';
+               '🎯 TERMINAL:\n  clear, exit, logout, screen, tmux, bash, zsh\n\n' +
+               'PACKAGE MANAGEMENT EXAMPLES:\n' +
+               '  apt update && apt upgrade\n' +
+               '  apt install nodejs nginx docker.io\n' +
+               '  apt search python\n' +
+               '  git clone https://github.com/user/repo\n' +
+               '  npm install -g create-react-app';
       
       case 'clear':
         setLines([]);
@@ -210,8 +235,187 @@ export function TerminalWindow() {
       
       case 'lscpu':
         return 'Architecture:          aarch64\nByte Order:            Little Endian\nCPU(s):                8\nOn-line CPU(s) list:   0-7\nThread(s) per core:    1\nCore(s) per socket:    8\nSocket(s):             1\nStepping:              r1p0\nCPU max MHz:           3200.0000\nCPU min MHz:           300.0000\nBogoMIPS:              38.40\nFlags:                 fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp ssbs\nModel name:            Snapdragon 8 Gen 2\nL1d cache:             64 KiB\nL1i cache:             64 KiB\nL2 cache:              512 KiB\nL3 cache:              8 MiB\nVulnerability Itlb multihit:     Not affected\nVulnerability L1tf:              Not affected\nVulnerability Mds:               Not affected\nVulnerability Meltdown:          Not affected\nVulnerability Spec store bypass: Mitigation; Speculative Store Bypass disabled\nVulnerability Spectre v1:        Mitigation; __user pointer sanitization\nVulnerability Spectre v2:        Mitigation; Branch predictor hardening';
+      // Package Management - APT
+      case 'apt':
+      case 'apt-get':
+        const subCmd = args[0];
+        if (subCmd === 'update') {
+          return 'Hit:1 http://deb.debian.org/debian bookworm InRelease\nHit:2 http://deb.debian.org/debian bookworm-updates InRelease\nHit:3 http://security.debian.org/debian-security bookworm-security InRelease\nReading package lists... Done\nBuilding dependency tree... Done\nReading state information... Done\nAll packages are up to date.';
+        }
+        if (subCmd === 'upgrade') {
+          return 'Reading package lists... Done\nBuilding dependency tree... Done\nReading state information... Done\nCalculating upgrade... Done\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.';
+        }
+        if (subCmd === 'install') {
+          const packages = args.slice(1);
+          if (packages.length === 0) return 'apt: no packages specified for installation';
+          let result = 'Reading package lists... Done\nBuilding dependency tree... Done\nReading state information... Done\n';
+          packages.forEach(pkg => {
+            if (PACKAGES_DB[pkg]) {
+              const info = PACKAGES_DB[pkg];
+              if (info.installed) {
+                result += `${pkg} is already the newest version (${info.version}).\n`;
+              } else {
+                result += `The following NEW packages will be installed:\n  ${pkg}\n`;
+                result += `Get:1 http://deb.debian.org/debian bookworm/main arm64 ${pkg} ${info.version} [2,345 kB]\n`;
+                result += `Fetched 2,345 kB in 1s (2,345 kB/s)\nSelecting previously unselected package ${pkg}.\n`;
+                result += `(Reading database ... 247891 files and directories currently installed.)\n`;
+                result += `Preparing to unpack .../00-${pkg}_${info.version}_arm64.deb ...\n`;
+                result += `Unpacking ${pkg} (${info.version}) ...\nSetting up ${pkg} (${info.version}) ...\n`;
+                PACKAGES_DB[pkg].installed = true;
+              }
+            } else {
+              result += `E: Unable to locate package ${pkg}\n`;
+            }
+          });
+          return result;
+        }
+        if (subCmd === 'remove') {
+          const packages = args.slice(1);
+          if (packages.length === 0) return 'apt: no packages specified for removal';
+          let result = 'Reading package lists... Done\nBuilding dependency tree... Done\nReading state information... Done\n';
+          packages.forEach(pkg => {
+            if (PACKAGES_DB[pkg] && PACKAGES_DB[pkg].installed) {
+              result += `The following packages will be REMOVED:\n  ${pkg}\n`;
+              result += `(Reading database ... 247891 files and directories currently installed.)\n`;
+              result += `Removing ${pkg} (${PACKAGES_DB[pkg].version}) ...\n`;
+              PACKAGES_DB[pkg].installed = false;
+            } else {
+              result += `Package '${pkg}' is not installed, so not removed\n`;
+            }
+          });
+          return result;
+        }
+        if (subCmd === 'search') {
+          const query = args[1];
+          if (!query) return 'apt search: argument required';
+          let result = 'Sorting... Done\nFull Text Search... Done\n';
+          Object.entries(PACKAGES_DB).forEach(([pkg, info]) => {
+            if (pkg.includes(query) || info.description.includes(query)) {
+              const status = info.installed ? '[installed]' : '';
+              result += `${pkg}/${info.version} arm64 ${status}\n  ${info.description}\n\n`;
+            }
+          });
+          return result || `No packages found matching '${query}'`;
+        }
+        if (subCmd === 'list') {
+          if (args[1] === '--installed') {
+            let result = 'Listing... Done\n';
+            Object.entries(PACKAGES_DB).forEach(([pkg, info]) => {
+              if (info.installed) {
+                result += `${pkg}/${info.version} arm64 [installed]\n`;
+              }
+            });
+            return result;
+          }
+          return 'WARNING: apt does not have a stable CLI interface. Use with caution in scripts.\n\nNOTE: This is only a simulation of apt functionality.';
+        }
+        return 'Usage: apt <command> [options]\n\nCommands:\n  update - update package index\n  upgrade - upgrade installed packages\n  install <pkg> - install package\n  remove <pkg> - remove package\n  search <term> - search for packages\n  list [--installed] - list packages';
 
-      
+      // Package Management - DPKG
+      case 'dpkg':
+        if (args[0] === '-l' || args[0] === '--list') {
+          let result = 'Desired=Unknown/Install/Remove/Purge/Hold\n| Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend\n|/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)\n||/ Name           Version      Architecture Description\n+++-==============-============-============-=================================\n';
+          Object.entries(PACKAGES_DB).forEach(([pkg, info]) => {
+            if (info.installed) {
+              result += `ii  ${pkg.padEnd(14)} ${info.version.padEnd(12)} arm64        ${info.description}\n`;
+            }
+          });
+          return result;
+        }
+        return 'dpkg: package management for CVJ Terminal OS\nUsage: dpkg [options] <command>\n\nCommands:\n  -l, --list                List packages\n  -s, --status <package>    Display package status';
+
+      // GitHub Integration
+      case 'git':
+        if (args[0] === 'clone') {
+          const repoUrl = args[1];
+          if (!repoUrl) return 'fatal: You must specify a repository to clone.';
+          
+          // Extract repo name from URL
+          const repoName = repoUrl.split('/').pop()?.replace('.git', '') || 'repository';
+          
+          return `Cloning into '${repoName}'...\nremote: Enumerating objects: 247, done.\nremote: Counting objects: 100% (247/247), done.\nremote: Compressing objects: 100% (156/156), done.\nremote: Total 247 (delta 91), reused 123 (delta 45), pack-reused 0\nReceiving objects: 100% (247/247), 1.23 MiB | 2.45 MiB/s, done.\nResolving deltas: 100% (91/91), done.\n\n✓ Repository cloned successfully to ./${repoName}/`;
+        }
+        if (args[0] === 'status') return 'On branch main\nYour branch is up to date with \'origin/main\'.\n\nnothing to commit, working tree clean';
+        if (args[0] === '--version') return 'git version 2.39.2';
+        if (args[0] === 'log') return 'commit abc123def456 (HEAD -> main, origin/main)\nAuthor: CVJ <cvj@terminal.os>\nDate:   Wed Dec 18 14:30:00 2024 +0000\n\n    Initial commit for CVJ Terminal OS\n\ncommit def456abc123\nAuthor: CVJ <cvj@terminal.os>\nDate:   Tue Dec 17 10:15:00 2024 +0000\n\n    Add package management system';
+        if (args[0] === 'branch') return '* main\n  development\n  feature/terminal-enhancements\n  feature/package-manager';
+        if (args[0] === 'pull') return 'Already up to date.';
+        if (args[0] === 'push') return 'Everything up-to-date';
+        return 'usage: git [--version] [--help] [-C <path>] [-c <name>=<value>]\n           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]\n           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]\n           [--super-prefix=<path>] [--config-env=<name>=<envvar>]\n           <command> [<args>]';
+
+      // Node Package Manager
+      case 'npm':
+        if (args[0] === '--version') return '9.2.0';
+        if (args[0] === 'install') {
+          const packages = args.slice(1);
+          if (packages.length === 0) return 'npm: no packages specified';
+          let result = '';
+          packages.forEach(pkg => {
+            if (pkg.startsWith('-g')) return;
+            const isGlobal = args.includes('-g');
+            result += `${isGlobal ? 'added' : 'added'} ${pkg}@latest\n`;
+          });
+          result += `\naudited 247 packages in 2.3s\n\n89 packages are looking for funding\n  run \`npm fund\` for details\n\nfound 0 vulnerabilities`;
+          return result;
+        }
+        if (args[0] === 'list') return 'cvj-terminal@1.0.0 /data/data/com.cvj.terminal/files/home\n├── express@4.18.2\n├── lodash@4.17.21\n├── react@18.2.0\n└── typescript@5.0.4';
+        if (args[0] === 'init') return 'This utility will walk you through creating a package.json file.\nPress ^C at any time to quit.\npackage name: (project) ';
+        return 'Usage: npm <command>\n\nwhere <command> is one of:\n    access, adduser, audit, bin, bugs, c, cache, ci, cit,\n    clean-install, clean-install-test, completion, config,\n    create, ddp, dedupe, deprecate, dist-tag, docs, doctor,\n    edit, exec, explain, explore, find-dupes, fund, get, help,\n    hook, i, init, install, install-ci-test, install-test, it,\n    link, list, ln, login, logout, ls, outdated, owner, pack,\n    ping, prefix, profile, prune, publish, rebuild, repo,\n    restart, root, run, run-script, s, se, search, set, shrinkwrap,\n    star, stars, start, stop, t, team, test, token, tst, un,\n    uninstall, unpublish, unstar, up, update, v, version, view,\n    whoami';
+
+      // Python Package Manager
+      case 'pip':
+      case 'pip3':
+        if (args[0] === '--version') return 'pip 23.3.1 from /usr/lib/python3/dist-packages/pip (python 3.11)';
+        if (args[0] === 'install') {
+          const packages = args.slice(1);
+          if (packages.length === 0) return 'ERROR: You must give at least one requirement to install';
+          let result = 'Collecting packages...\n';
+          packages.forEach(pkg => {
+            result += `Collecting ${pkg}\n  Downloading ${pkg}-1.0.0-py3-none-any.whl (123 kB)\n`;
+          });
+          result += 'Installing collected packages: ' + packages.join(', ') + '\n';
+          result += `Successfully installed ${packages.join('-1.0.0 ')}-1.0.0`;
+          return result;
+        }
+        if (args[0] === 'list') return 'Package    Version\n---------- -------\nnumpy      1.24.3\npandas     2.0.3\nrequests   2.31.0\nFlask      2.3.3\nDjango     4.2.7\npillow     10.0.1\nscipy      1.11.4';
+        if (args[0] === 'show') {
+          const pkg = args[1];
+          if (!pkg) return 'ERROR: Please provide package name';
+          return `Name: ${pkg}\nVersion: 1.0.0\nSummary: Python package for CVJ Terminal OS\nHome-page: https://github.com/cvj/${pkg}\nAuthor: CVJ Terminal Team\nLicense: MIT\nLocation: /usr/lib/python3/dist-packages\nRequires: \nRequired-by: `;
+        }
+        return 'Usage: pip <command> [options]\n\nCommands:\n  install                     Install packages.\n  download                    Download packages.\n  uninstall                   Uninstall packages.\n  freeze                      Output installed packages in requirements format.\n  list                        List installed packages.\n  show                        Show information about installed packages.\n  check                       Verify installed packages have compatible dependencies.\n  search                      Search PyPI for packages.\n  wheel                       Build wheels from your requirements.\n  hash                        Compute hashes of package archives.\n  completion                  A helper command used for command completion.\n  debug                       Show information useful for debugging.\n  help                        Show help for commands.';
+
+      // Snap Package Manager
+      case 'snap':
+        if (args[0] === 'list') {
+          return 'Name    Version   Rev   Tracking       Publisher   Notes\ncore20  20231123  2105  latest/stable  canonical✓  base\ncore22  20231123  864   latest/stable  canonical✓  base\nsnapd   2.60.4    20092 latest/stable  canonical✓  snapd';
+        }
+        if (args[0] === 'find') {
+          const query = args[1] || '';
+          return `Name               Version    Publisher    Notes  Summary\ncode               1.84.2     microsoft✓   -      Visual Studio Code\nfirefox            119.0      mozilla✓     -      Mozilla Firefox\nvscode             1.84.2     microsoft✓   -      Visual Studio Code\ndiscord            0.0.30     snapcrafters -      Discord for Linux`;
+        }
+        if (args[0] === 'install') {
+          const pkg = args[1];
+          if (!pkg) return 'error: the required argument `<snap>` was not provided';
+          return `Installing ${pkg}...\n${pkg} installed`;
+        }
+        return 'Usage: snap <command> [options]\n\nCommands:\n  list      List installed snaps\n  find      Find packages to install\n  install   Install snaps\n  remove    Remove snaps\n  refresh   Refresh snaps\n  info      Show detailed information about snaps';
+
+      // Docker
+      case 'docker':
+        if (args[0] === '--version') return 'Docker version 24.0.7, build afdd53b';
+        if (args[0] === 'ps') return 'CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES';
+        if (args[0] === 'images') return 'REPOSITORY   TAG       IMAGE ID       CREATED       SIZE\nubuntu       latest    174c8c134b2a   2 weeks ago   77.8MB\nnginx        latest    605c77e624dd   3 weeks ago   141MB';
+        if (args[0] === 'pull') {
+          const image = args[1] || 'ubuntu';
+          return `Using default tag: latest\nlatest: Pulling from library/${image}\n2d473b07cdd5: Pull complete\nDigest: sha256:20e1fc0a...\nStatus: Downloaded newer image for ${image}:latest\ndocker.io/library/${image}:latest`;
+        }
+        if (args[0] === 'run') {
+          const image = args[args.length - 1];
+          return `Unable to find image '${image}:latest' locally\nlatest: Pulling from library/${image}\nPull complete\nStarting container...`;
+        }
+        return 'Usage:  docker [OPTIONS] COMMAND\n\nA self-sufficient runtime for containers\n\nManagement Commands:\n  container   Manage containers\n  image       Manage images\n  network     Manage networks\n  volume      Manage volumes\n\nCommands:\n  attach      Attach local standard input, output, and error streams to a running container\n  build       Build an image from a Dockerfile\n  commit      Create a new image from a container\'s changes\n  cp          Copy files/folders between a container and the local filesystem\n  create      Create a new container\n  diff        Inspect changes to files or directories on a container\'s filesystem\n  events      Get real time events from the server\n  exec        Run a command in a running container\n  export      Export a container\'s filesystem as a tar archive\n  history     Show the history of an image\n  images      List images\n  import      Import the contents from a tarball to create a filesystem image\n  info        Display system-wide information\n  inspect     Return low-level information on Docker objects\n  kill        Kill one or more running containers\n  load        Load an image from a tar archive or STDIN\n  login       Log in to a Docker registry\n  logout      Log out from a Docker registry\n  logs        Fetch the logs of a container\n  pause       Pause all processes within one or more containers\n  port        List port mappings or a specific mapping for the container\n  ps          List containers\n  pull        Pull an image or a repository from a registry\n  push        Push an image or a repository to a registry\n  rename      Rename a container\n  restart     Restart one or more containers\n  rm          Remove one or more containers\n  rmi         Remove one or more images\n  run         Run a command in a new container\n  save        Save one or more images to a tar archive (streamed to STDOUT by default)\n  search      Search the Docker Hub for images\n  start       Start one or more stopped containers\n  stats       Display a live stream of container(s) resource usage statistics\n  stop        Stop one or more running containers\n  tag         Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE\n  top         Display the running processes of a container\n  unpause     Unpause all processes within one or more containers\n  update      Update configuration of one or more containers\n  version     Show the Docker version information\n  wait        Block until one or more containers stop, then print their exit codes';
+
       default:
         // Check if it looks like a common command with typo
         const suggestions = ['ls', 'cd', 'pwd', 'cat', 'grep', 'find', 'ps', 'top', 'git', 'vim', 'nano', 'docker', 'python3', 'node'];
