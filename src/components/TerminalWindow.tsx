@@ -8,21 +8,153 @@ interface TerminalLine {
   timestamp: Date;
 }
 
-// Package database simulation
+// Enhanced Package Database - Termux-style
 const PACKAGES_DB = {
-  'curl': { version: '7.88.1', description: 'command line tool for transferring data', installed: true },
-  'git': { version: '2.39.2', description: 'fast, scalable, distributed revision control system', installed: true },
-  'vim': { version: '9.0.1000', description: 'Vi IMproved - enhanced vi editor', installed: true },
-  'python3': { version: '3.11.7', description: 'interactive high-level object-oriented language', installed: true },
-  'nodejs': { version: '18.19.0', description: 'evented I/O for V8 javascript', installed: false },
-  'docker.io': { version: '24.0.7', description: 'Linux container runtime', installed: false },
-  'nginx': { version: '1.22.1', description: 'small, powerful, scalable web/proxy server', installed: false },
-  'postgresql': { version: '15.4', description: 'object-relational SQL database', installed: false },
-  'redis': { version: '7.0.12', description: 'persistent key-value database', installed: false },
-  'htop': { version: '3.2.2', description: 'interactive processes viewer', installed: true },
-  'neofetch': { version: '7.1.0', description: 'fast, highly customizable system info script', installed: true },
-  'tmux': { version: '3.3a', description: 'terminal multiplexer', installed: false },
-  'zsh': { version: '5.9', description: 'shell designed for interactive use', installed: false },
+  // Core System Tools
+  'bash': { version: '5.1.16', description: 'GNU Bourne Again SHell', installed: true, category: 'shell' },
+  'zsh': { version: '5.9', description: 'Z shell - extended bash with features', installed: false, category: 'shell' },
+  'fish': { version: '3.6.1', description: 'friendly interactive shell', installed: false, category: 'shell' },
+  'coreutils': { version: '9.1', description: 'GNU core utilities', installed: true, category: 'system' },
+  'findutils': { version: '4.9.0', description: 'GNU find utilities', installed: true, category: 'system' },
+  'grep': { version: '3.8', description: 'GNU grep pattern matcher', installed: true, category: 'text' },
+  'sed': { version: '4.8', description: 'stream editor', installed: true, category: 'text' },
+  'awk': { version: '5.1.0', description: 'GNU awk text processor', installed: true, category: 'text' },
+  'curl': { version: '7.88.1', description: 'command line tool for transferring data', installed: true, category: 'network' },
+  'wget': { version: '1.21.3', description: 'GNU Wget network downloader', installed: true, category: 'network' },
+  
+  // Development Tools
+  'git': { version: '2.39.2', description: 'fast, scalable, distributed revision control system', installed: true, category: 'development' },
+  'vim': { version: '9.0.1000', description: 'Vi IMproved - enhanced vi editor', installed: true, category: 'editor' },
+  'nano': { version: '7.0', description: 'simple text editor', installed: true, category: 'editor' },
+  'emacs': { version: '28.2', description: 'GNU Emacs editor', installed: false, category: 'editor' },
+  'gcc': { version: '12.2.0', description: 'GNU Compiler Collection', installed: false, category: 'development' },
+  'clang': { version: '15.0.7', description: 'LLVM C/C++/Objective-C compiler', installed: false, category: 'development' },
+  'make': { version: '4.3', description: 'GNU Make build tool', installed: false, category: 'development' },
+  'cmake': { version: '3.25.1', description: 'cross-platform build system', installed: false, category: 'development' },
+  'autoconf': { version: '2.71', description: 'automatic configure script builder', installed: false, category: 'development' },
+  'automake': { version: '1.16.5', description: 'tool for generating Makefile.in files', installed: false, category: 'development' },
+  'pkg-config': { version: '0.29.2', description: 'manage compile and link flags', installed: false, category: 'development' },
+  
+  // Programming Languages
+  'python': { version: '3.11.7', description: 'interactive high-level object-oriented language', installed: true, category: 'language' },
+  'python3': { version: '3.11.7', description: 'Python 3 interpreter', installed: true, category: 'language' },
+  'python2': { version: '2.7.18', description: 'Python 2 interpreter (legacy)', installed: false, category: 'language' },
+  'nodejs': { version: '18.19.0', description: 'evented I/O for V8 javascript', installed: false, category: 'language' },
+  'ruby': { version: '3.1.0', description: 'object-oriented scripting language', installed: false, category: 'language' },
+  'perl': { version: '5.36.0', description: 'practical extraction and report language', installed: false, category: 'language' },
+  'php': { version: '8.2.0', description: 'server-side HTML-embedded scripting language', installed: false, category: 'language' },
+  'go': { version: '1.20.0', description: 'Go programming language compiler', installed: false, category: 'language' },
+  'rust': { version: '1.67.0', description: 'systems programming language', installed: false, category: 'language' },
+  'java-jdk': { version: '17.0.5', description: 'Java Development Kit', installed: false, category: 'language' },
+  'kotlin': { version: '1.8.0', description: 'Kotlin programming language', installed: false, category: 'language' },
+  
+  // Servers & Services
+  'nginx': { version: '1.22.1', description: 'small, powerful, scalable web/proxy server', installed: false, category: 'server' },
+  'apache2': { version: '2.4.54', description: 'Apache HTTP Server', installed: false, category: 'server' },
+  'postgresql': { version: '15.4', description: 'object-relational SQL database', installed: false, category: 'database' },
+  'mysql': { version: '8.0.32', description: 'MySQL database server', installed: false, category: 'database' },
+  'sqlite': { version: '3.40.1', description: 'lightweight SQL database', installed: false, category: 'database' },
+  'redis': { version: '7.0.12', description: 'persistent key-value database', installed: false, category: 'database' },
+  'mongodb': { version: '6.0.4', description: 'NoSQL document database', installed: false, category: 'database' },
+  'mariadb': { version: '10.9.4', description: 'MariaDB database server', installed: false, category: 'database' },
+  
+  // System Monitoring & Tools
+  'htop': { version: '3.2.2', description: 'interactive processes viewer', installed: true, category: 'monitor' },
+  'neofetch': { version: '7.1.0', description: 'fast, highly customizable system info script', installed: true, category: 'system' },
+  'screenfetch': { version: '3.9.1', description: 'system information tool with ASCII art', installed: false, category: 'system' },
+  'tmux': { version: '3.3a', description: 'terminal multiplexer', installed: false, category: 'terminal' },
+  'screen': { version: '4.9.0', description: 'terminal multiplexer', installed: false, category: 'terminal' },
+  'tree': { version: '2.0.4', description: 'display directory tree structure', installed: true, category: 'files' },
+  'ncdu': { version: '1.17', description: 'disk usage analyzer with ncurses interface', installed: false, category: 'files' },
+  'rsync': { version: '3.2.7', description: 'fast, versatile file synchronization', installed: false, category: 'files' },
+  'zip': { version: '3.0', description: 'compression and file packaging utility', installed: true, category: 'archive' },
+  'unzip': { version: '6.0', description: 'extraction utility for zip files', installed: true, category: 'archive' },
+  'tar': { version: '1.34', description: 'GNU tar archiving utility', installed: true, category: 'archive' },
+  'gzip': { version: '1.12', description: 'GNU compression utility', installed: true, category: 'archive' },
+  'bzip2': { version: '1.0.8', description: 'block-sorting file compressor', installed: true, category: 'archive' },
+  'xz': { version: '5.2.5', description: 'XZ format compression utility', installed: true, category: 'archive' },
+  '7zip': { version: '22.01', description: '7-Zip file archiver with high compression ratio', installed: false, category: 'archive' },
+  
+  // Network Tools
+  'openssh': { version: '9.1p1', description: 'OpenSSH connectivity tools', installed: true, category: 'network' },
+  'nmap': { version: '7.93', description: 'network exploration tool and security scanner', installed: false, category: 'network' },
+  'netcat': { version: '1.10', description: 'TCP/IP swiss army knife', installed: false, category: 'network' },
+  'wireshark': { version: '4.0.3', description: 'network protocol analyzer', installed: false, category: 'network' },
+  'iperf3': { version: '3.12', description: 'internet Protocol bandwidth measuring tool', installed: false, category: 'network' },
+  'traceroute': { version: '2.1.0', description: 'trace network route to host', installed: false, category: 'network' },
+  'dnsutils': { version: '9.18.8', description: 'DNS lookup utilities', installed: false, category: 'network' },
+  
+  // Media & Graphics
+  'ffmpeg': { version: '5.1.2', description: 'multimedia framework for converting audio/video', installed: false, category: 'media' },
+  'imagemagick': { version: '7.1.0', description: 'image manipulation toolkit', installed: false, category: 'media' },
+  'gimp': { version: '2.10.32', description: 'GNU Image Manipulation Program', installed: false, category: 'media' },
+  'vlc': { version: '3.0.18', description: 'multimedia player and framework', installed: false, category: 'media' },
+  
+  // Container & Virtualization
+  'docker.io': { version: '24.0.7', description: 'Linux container runtime', installed: false, category: 'container' },
+  'podman': { version: '4.3.1', description: 'daemonless container engine', installed: false, category: 'container' },
+  'qemu': { version: '7.2.0', description: 'machine emulator and virtualizer', installed: false, category: 'virtualization' },
+  
+  // Text Processing
+  'pandoc': { version: '2.19.2', description: 'universal markup converter', installed: false, category: 'text' },
+  'jq': { version: '1.6', description: 'lightweight and flexible command-line JSON processor', installed: false, category: 'text' },
+  'xmlstarlet': { version: '1.6.1', description: 'XML command line toolkit', installed: false, category: 'text' },
+  
+  // System Libraries
+  'openssl': { version: '3.0.7', description: 'Secure Sockets Layer toolkit', installed: true, category: 'library' },
+  'libssl-dev': { version: '3.0.7', description: 'SSL development libraries', installed: false, category: 'library' },
+  'build-essential': { version: '12.9', description: 'essential packages for building software', installed: false, category: 'development' },
+  'libc6-dev': { version: '2.36', description: 'GNU C Library development files', installed: false, category: 'library' },
+  
+  // Package Managers & Tools
+  'pip': { version: '22.3.1', description: 'Python package installer', installed: true, category: 'package-manager' },
+  'npm': { version: '9.2.0', description: 'Node.js package manager', installed: false, category: 'package-manager' },
+  'yarn': { version: '1.22.19', description: 'fast, reliable, and secure dependency management', installed: false, category: 'package-manager' },
+  'cargo': { version: '1.67.0', description: 'Rust package manager', installed: false, category: 'package-manager' },
+  'gem': { version: '3.4.1', description: 'Ruby package manager', installed: false, category: 'package-manager' },
+  'composer': { version: '2.5.1', description: 'PHP dependency manager', installed: false, category: 'package-manager' },
+  
+  // Additional Useful Tools
+  'strace': { version: '6.0', description: 'system call tracer', installed: false, category: 'debug' },
+  'gdb': { version: '12.1', description: 'GNU Debugger', installed: false, category: 'debug' },
+  'valgrind': { version: '3.19.0', description: 'memory debugging and profiling tool', installed: false, category: 'debug' },
+  'ltrace': { version: '0.7.3', description: 'library call tracer', installed: false, category: 'debug' },
+  'man-db': { version: '2.11.2', description: 'manual page database utilities', installed: true, category: 'documentation' },
+  'info': { version: '7.0', description: 'GNU info documentation reader', installed: true, category: 'documentation' },
+};
+
+// Termux-style mirrors and repositories
+const TERMUX_MIRRORS = {
+  main: [
+    'https://packages.termux.dev/apt/termux-main',
+    'https://termux.mentality.rip/termux-main',
+    'https://mirror.accum.se/mirror/termux-main',
+    'https://packages-cf.termux.dev/apt/termux-main'
+  ],
+  root: [
+    'https://packages.termux.dev/apt/termux-root',
+    'https://termux.mentality.rip/termux-root'
+  ],
+  x11: [
+    'https://packages.termux.dev/apt/termux-x11',
+    'https://termux.mentality.rip/termux-x11'
+  ]
+};
+
+// Simulated filesystem
+const FILESYSTEM = {
+  '/data/data/com.termux/files/home': {
+    type: 'directory',
+    contents: ['scripts', 'tools', 'projects', 'Documents', 'Downloads', 'bin', '.bashrc', '.profile', '.ssh']
+  },
+  '/data/data/com.termux/files/usr': {
+    type: 'directory', 
+    contents: ['bin', 'lib', 'include', 'share', 'etc', 'var']
+  },
+  '/data/data/com.termux/files/usr/bin': {
+    type: 'directory',
+    contents: Object.keys(PACKAGES_DB).filter(pkg => PACKAGES_DB[pkg].installed)
+  }
 };
 
 const DEMO_COMMANDS = [
@@ -108,29 +240,44 @@ export function TerminalWindow() {
     
     switch (cmd) {
       case 'help':
-        return 'CVJ Terminal OS - Complete Linux Command Suite:\n\n' +
-               '📁 FILES & DIRECTORIES:\n  ls, pwd, cd, mkdir, rmdir, rm, cp, mv, ln, find, locate, du, tree\n' +
-               '📄 FILE OPERATIONS:\n  cat, head, tail, less, more, grep, awk, sed, sort, uniq, wc, diff\n' +
+        return 'CVJ Terminal OS - Complete Termux-Compatible Environment:\n\n' +
+               '📁 FILES & DIRECTORIES:\n  ls, pwd, cd, mkdir, rmdir, rm, cp, mv, ln, find, locate, du, tree, ncdu\n' +
+               '📄 FILE OPERATIONS:\n  cat, head, tail, less, more, grep, awk, sed, sort, uniq, wc, diff, patch\n' +
                '🔐 PERMISSIONS:\n  chmod, chown, chgrp, umask, getfacl, setfacl\n' +
-               '⚡ PROCESSES:\n  ps, top, htop, kill, killall, jobs, nohup, bg, fg, pgrep, pkill\n' +
-               '💾 SYSTEM INFO:\n  neofetch, uname, whoami, id, uptime, hostname, lscpu, lsmem, free, df\n' +
-               '🔧 HARDWARE:\n  lsblk, fdisk, lsusb, lspci, dmidecode, sensors, lshw\n' +
-               '🌐 NETWORKING:\n  ping, wget, curl, netstat, ss, iptables, nmap, traceroute, dig, nslookup\n' +
-               '📦 PACKAGE MANAGERS:\n  apt, apt-get, dpkg, snap, flatpak, pip, npm, yarn, cargo\n' +
-               '🔄 GITHUB INTEGRATION:\n  git clone, git pull, git push, gh repo clone, gh release download\n' +
-               '📚 ARCHIVES:\n  tar, zip, unzip, gzip, gunzip, bzip2, bunzip2, 7z\n' +
-               '👨‍💻 DEVELOPMENT:\n  git, python3, node, npm, pip, gcc, make, cmake, docker, kubernetes\n' +
-               '✏️  EDITORS:\n  vim, nano, emacs, gedit\n' +
-               '🛠️  UTILITIES:\n  echo, date, cal, bc, history, alias, which, type, man, info\n' +
-               '🔒 SECURITY:\n  sudo, su, passwd, ssh, scp, rsync, gpg\n' +
-               '📊 MONITORING:\n  watch, iostat, vmstat, sar, dmesg, journalctl\n' +
-               '🎯 TERMINAL:\n  clear, exit, logout, screen, tmux, bash, zsh\n\n' +
-               'PACKAGE MANAGEMENT EXAMPLES:\n' +
-               '  apt update && apt upgrade\n' +
-               '  apt install nodejs nginx docker.io\n' +
-               '  apt search python\n' +
-               '  git clone https://github.com/user/repo\n' +
-               '  npm install -g create-react-app';
+               '⚡ PROCESSES:\n  ps, top, htop, kill, killall, jobs, nohup, bg, fg, pgrep, pkill, pstree\n' +
+               '💾 SYSTEM INFO:\n  neofetch, screenfetch, uname, whoami, id, uptime, hostname, lscpu, free, df\n' +
+               '🔧 HARDWARE:\n  lsblk, fdisk, lsusb, lspci, dmidecode, sensors, lshw, dmesg\n' +
+               '🌐 NETWORKING:\n  ping, wget, curl, netstat, ss, iptables, nmap, traceroute, dig, nslookup, nc\n' +
+               '📦 PACKAGE MANAGERS:\n  apt, apt-get, dpkg, pip, npm, yarn, cargo, gem, composer\n' +
+               '🔄 VCS & GITHUB:\n  git (clone, status, log, branch, pull, push, diff, merge)\n' +
+               '📚 ARCHIVES:\n  tar, zip, unzip, gzip, gunzip, bzip2, bunzip2, xz, 7zip\n' +
+               '👨‍💻 DEVELOPMENT:\n  gcc, clang, make, cmake, autoconf, automake, pkg-config\n' +
+               '🗣️  LANGUAGES:\n  python, python3, node, ruby, perl, php, go, rust, java, kotlin\n' +
+               '✏️  EDITORS:\n  vim, nano, emacs\n' +
+               '🛠️  UTILITIES:\n  echo, date, cal, bc, history, alias, which, type, man, info, jq\n' +
+               '🔒 SECURITY:\n  ssh, scp, rsync, gpg, openssl, strace, gdb, valgrind\n' +
+               '📊 MONITORING:\n  watch, iostat, vmstat, sar, dmesg, journalctl, iperf3\n' +
+               '🎯 TERMINAL:\n  clear, exit, logout, screen, tmux, bash, zsh, fish\n' +
+               '🎮 MEDIA:\n  ffmpeg, imagemagick, vlc\n' +
+               '📡 SERVERS:\n  nginx, apache2, postgresql, mysql, redis, mongodb\n' +
+               '📦 CONTAINERS:\n  docker, podman\n\n' +
+               '🚀 TERMUX FEATURES:\n' +
+               '  • Full Debian package repository access\n' +
+               '  • Multiple mirror support for reliability\n' +
+               '  • Cross-compilation support\n' +
+               '  • Root repository for advanced tools\n' +
+               '  • X11 repository for GUI applications\n\n' +
+               'QUICK START EXAMPLES:\n' +
+               '  apt update && apt upgrade                # Update system\n' +
+               '  apt install python nodejs git vim       # Install development tools\n' +
+               '  apt search web                          # Search for packages\n' +
+               '  git clone https://github.com/user/repo  # Clone repository\n' +
+               '  pip install django flask               # Install Python packages\n' +
+               '  npm install -g create-react-app        # Install Node.js tools\n' +
+               '  termux-setup-storage                    # Enable storage access\n' +
+               '  pkg install <package>                   # Termux-specific installer\n\n' +
+               'MIRRORS STATUS: ' + TERMUX_MIRRORS.main.length + ' main mirrors, ' + 
+               TERMUX_MIRRORS.root.length + ' root mirrors, ' + TERMUX_MIRRORS.x11.length + ' X11 mirrors';
       
       case 'clear':
         setLines([]);
@@ -235,81 +382,402 @@ export function TerminalWindow() {
       
       case 'lscpu':
         return 'Architecture:          aarch64\nByte Order:            Little Endian\nCPU(s):                8\nOn-line CPU(s) list:   0-7\nThread(s) per core:    1\nCore(s) per socket:    8\nSocket(s):             1\nStepping:              r1p0\nCPU max MHz:           3200.0000\nCPU min MHz:           300.0000\nBogoMIPS:              38.40\nFlags:                 fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp ssbs\nModel name:            Snapdragon 8 Gen 2\nL1d cache:             64 KiB\nL1i cache:             64 KiB\nL2 cache:              512 KiB\nL3 cache:              8 MiB\nVulnerability Itlb multihit:     Not affected\nVulnerability L1tf:              Not affected\nVulnerability Mds:               Not affected\nVulnerability Meltdown:          Not affected\nVulnerability Spec store bypass: Mitigation; Speculative Store Bypass disabled\nVulnerability Spectre v1:        Mitigation; __user pointer sanitization\nVulnerability Spectre v2:        Mitigation; Branch predictor hardening';
-      // Package Management - APT
+
+      // Termux-specific commands
+      case 'pkg':
+        const pkgCmd = args[0];
+        if (pkgCmd === 'install' || pkgCmd === 'in') {
+          const packages = args.slice(1);
+          if (packages.length === 0) return 'pkg: no packages specified';
+          return executeCommand(`apt install ${packages.join(' ')}`);
+        }
+        if (pkgCmd === 'uninstall' || pkgCmd === 'un') {
+          const packages = args.slice(1);
+          return executeCommand(`apt remove ${packages.join(' ')}`);
+        }
+        if (pkgCmd === 'update' || pkgCmd === 'up') {
+          return executeCommand('apt update');
+        }
+        if (pkgCmd === 'upgrade' || pkgCmd === 'upg') {
+          return executeCommand('apt upgrade');
+        }
+        if (pkgCmd === 'search' || pkgCmd === 's') {
+          const query = args[1];
+          return executeCommand(`apt search ${query}`);
+        }
+        if (pkgCmd === 'list' || pkgCmd === 'l') {
+          return executeCommand('apt list --installed');
+        }
+        if (pkgCmd === 'show') {
+          const pkg = args[1];
+          return executeCommand(`apt show ${pkg}`);
+        }
+        return 'Usage: pkg <command> [arguments]\n\nCommands:\n  install, in       Install packages\n  uninstall, un     Uninstall packages\n  update, up        Update package lists\n  upgrade, upg      Upgrade packages\n  search, s         Search packages\n  list, l           List installed packages\n  show              Show package information\n\nTermux package manager - simplified apt wrapper';
+
+      case 'termux-setup-storage':
+        return 'Setting up access to shared storage...\n\nPermission granted to access shared storage.\nShared storage is now available at:\n  ~/storage/shared (shared storage)\n  ~/storage/downloads (downloads folder)\n  ~/storage/dcim (camera pictures)\n  ~/storage/pictures (pictures)\n  ~/storage/music (music)\n  ~/storage/movies (movies)\n\nStorage setup complete!';
+
+      case 'termux-info':
+        return 'Termux Environment Information:\n\nTermux version: 0.118.0\nAndroid version: 13 (API level 33)\nKernel version: 5.15.74-android13-8-g6d2a7f9\nArchitecture: aarch64\n\nPaths:\n  TERMUX_APP_PACKAGE: com.termux\n  TERMUX_PREFIX: /data/data/com.termux/files/usr\n  TERMUX_ANDROID_HOME: /data/data/com.termux/files/home\n\nPackage Manager:\n  Mirror count: ' + TERMUX_MIRRORS.main.length + ' mirrors\n  Packages available: ' + Object.keys(PACKAGES_DB).length + '\n  Packages installed: ' + Object.values(PACKAGES_DB).filter(p => p.installed).length + '\n\nCapabilities:\n  ✓ Package installation\n  ✓ Development tools\n  ✓ Network access\n  ✓ Storage access\n  ✓ Root access (with termux-root)\n  ✓ X11 forwarding (with termux-x11)';
+
+      case 'termux-wake-lock':
+        return 'Acquired wake lock - device will not sleep while Termux is running.\nUse "termux-wake-unlock" to release the wake lock.';
+
+      case 'termux-wake-unlock':
+        return 'Released wake lock - device can now sleep normally.';
+
+      case 'termux-url-opener':
+        const url = args[0] || 'https://example.com';
+        return `Opening URL in default browser: ${url}\nURL opened successfully.`;
+
+      case 'am':
+        if (args[0] === 'start') {
+          const action = args.find(arg => arg.includes('android.intent.action'));
+          return `Starting activity: ${action || 'ACTION_VIEW'}\nActivity started successfully.`;
+        }
+        return 'Android Activity Manager - am <command>\nCommands:\n  start [options] <INTENT>    Start an Activity\n  startservice [options]      Start a Service\n  broadcast [options]         Send a broadcast Intent\n  force-stop <PACKAGE>        Force stop a package';
+
+      // Enhanced development tools
+      case 'gcc':
+      case 'clang':
+        if (args.includes('--version')) {
+          return cmd === 'gcc' ? 
+            'gcc (GCC) 12.2.0\nCopyright (C) 2022 Free Software Foundation, Inc.' :
+            'clang version 15.0.7\nTarget: aarch64-linux-android24';
+        }
+        if (args.length === 0) {
+          return `${cmd}: fatal error: no input files\ncompilation terminated.`;
+        }
+        const sourceFile = args[args.length - 1];
+        if (sourceFile.endsWith('.c') || sourceFile.endsWith('.cpp')) {
+          return `Compiling ${sourceFile}...\nCompilation successful.\nOutput: a.out`;
+        }
+        return `${cmd}: error: unrecognized file format`;
+
+      case 'make':
+        if (args.includes('--version')) {
+          return 'GNU Make 4.3\nBuilt for aarch64-unknown-linux-gnu';
+        }
+        return 'make: *** No targets specified and no makefile found.  Stop.';
+
+      case 'cmake':
+        if (args.includes('--version')) {
+          return 'cmake version 3.25.1\nCMake suite maintained and supported by Kitware';
+        }
+        if (args[0] === '.') {
+          return 'Configuring project...\n-- Configuring done\n-- Generating done\n-- Build files have been written to: .';
+        }
+        return 'Usage: cmake [options] <path-to-source>\n       cmake [options] <path-to-existing-build>';
+
+      // Enhanced network tools
+      case 'ping':
+        const host = args[0] || 'google.com';
+        return `PING ${host} (172.217.12.14) 56(84) bytes of data.\n64 bytes from ${host}: icmp_seq=1 ttl=118 time=12.4 ms\n64 bytes from ${host}: icmp_seq=2 ttl=118 time=11.8 ms\n64 bytes from ${host}: icmp_seq=3 ttl=118 time=13.2 ms\n^C\n--- ${host} ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2003ms\nrtt min/avg/max/mdev = 11.804/12.466/13.185/0.568 ms`;
+
+      case 'nmap':
+        if (args.includes('--version')) {
+          return 'Nmap version 7.93 ( https://nmap.org )\nPlatform: aarch64-unknown-linux-gnu';
+        }
+        const target = args[0] || '192.168.1.1';
+        return `Starting Nmap 7.93 at ${new Date().toLocaleString()}\nNmap scan report for ${target}\nHost is up (0.012s latency).\nNot shown: 996 closed ports\nPORT     STATE SERVICE\n22/tcp   open  ssh\n80/tcp   open  http\n443/tcp  open  https\n8080/tcp open  http-proxy\n\nNmap done: 1 IP address (1 host up) scanned in 1.23 seconds`;
+
+      case 'netcat':
+      case 'nc':
+        const port = args[args.length - 1];
+        const hostname = args[args.length - 2] || 'localhost';
+        return `Connecting to ${hostname} port ${port}...\nConnection established.\nType messages (Ctrl+C to exit)`;
+
+      // Enhanced text processing
+      case 'jq':
+        if (args.includes('--version')) {
+          return 'jq-1.6';
+        }
+        if (args[0] === '.') {
+          return '{\n  "message": "Hello from CVJ Terminal OS",\n  "version": "1.0.0",\n  "architecture": "aarch64"\n}';
+        }
+        return 'Usage: jq [options...] <jq filter> [file...]\njq is a tool for processing JSON inputs';
+
+      case 'find':
+        const searchPath = args[0] || '.';
+        const namePattern = args.includes('-name') ? args[args.indexOf('-name') + 1] : '*';
+        return `${searchPath}/scripts/backup.sh\n${searchPath}/scripts/monitor.py\n${searchPath}/tools/network_scanner.py\n${searchPath}/projects/cvj-terminal/README.md`;
+
+      // Archive tools
+      case 'tar':
+        if (args.includes('-tzf') || args.includes('-tf')) {
+          const archive = args[args.length - 1];
+          return `drwxr-xr-x  0 cvj    cvj         0 Dec 18 14:30 project/\n-rw-r--r--  0 cvj    cvj      1234 Dec 18 14:30 project/README.md\n-rw-r--r--  0 cvj    cvj      5678 Dec 18 14:30 project/main.py`;
+        }
+        if (args.includes('-czf')) {
+          const archive = args[args.indexOf('-czf') + 1];
+          return `Creating archive: ${archive}\nAdding files...\nArchive created successfully.`;
+        }
+        return 'Usage: tar [OPTION...] [FILE]...\nGNU tar: an archiver tool\n\nExamples:\n  tar -czf archive.tar.gz files/    Create compressed archive\n  tar -xzf archive.tar.gz          Extract compressed archive\n  tar -tzf archive.tar.gz          List archive contents';
+
+      // System monitoring
+      case 'dmesg':
+        return '[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x411fd080]\n[    0.000000] Linux version 5.15.74-android13-8-g6d2a7f9\n[    0.000000] Machine model: Snapdragon 8 Gen 2\n[    0.000000] Memory: 12582912K/12582912K available\n[    1.234567] CVJ Terminal OS initialized\n[    2.345678] Package manager ready: ' + Object.keys(PACKAGES_DB).length + ' packages available\n[    3.456789] Network interfaces up\n[   10.123456] User space started';
+
+      case 'journalctl':
+        return `-- Logs begin at Wed 2024-12-18 12:30:00 UTC, end at Wed 2024-12-18 14:30:00 UTC. --\nDec 18 12:30:00 cvj-terminal systemd[1]: Starting CVJ Terminal OS...\nDec 18 12:30:01 cvj-terminal cvj-terminal[1234]: CVJ Terminal OS v1.0 started\nDec 18 12:30:02 cvj-terminal cvj-terminal[1234]: Package database loaded: ${Object.keys(PACKAGES_DB).length} packages\nDec 18 12:30:03 cvj-terminal cvj-terminal[1234]: Mirror status: ${TERMUX_MIRRORS.main.length} mirrors active\nDec 18 14:29:58 cvj-terminal cvj-terminal[1234]: Terminal session started\nDec 18 14:30:00 cvj-terminal cvj-terminal[1234]: User authenticated: cvj`;
+
+      case 'watch':
+        const watchCmd = args.join(' ') || 'date';
+        return `Every 2.0s: ${watchCmd}                                    Wed Dec 18 14:30:15 2024\n\n${new Date().toString()}\n\n[Watching every 2 seconds - press Ctrl+C to exit]`;
+
+      // Additional useful commands
+      case 'which':
+        const binary = args[0];
+        if (!binary) return 'which: missing argument';
+        if (PACKAGES_DB[binary]?.installed) {
+          return `/data/data/com.termux/files/usr/bin/${binary}`;
+        }
+        return `which: no ${binary} in (/data/data/com.termux/files/usr/bin:/system/bin)`;
+
+      case 'type':
+        const cmd_type = args[0];
+        if (!cmd_type) return 'type: missing argument';
+        if (PACKAGES_DB[cmd_type]?.installed) {
+          return `${cmd_type} is /data/data/com.termux/files/usr/bin/${cmd_type}`;
+        }
+        return `bash: type: ${cmd_type}: not found`;
+
+      case 'alias':
+        if (args.length === 0) {
+          return 'alias ll=\'ls -la\'\nalias la=\'ls -A\'\nalias l=\'ls -CF\'\nalias pkg=\'apt\'\nalias python=\'python3\'\nalias pip=\'pip3\'';
+        }
+        const aliasName = args[0].split('=')[0];
+        return `alias ${args.join(' ')}\nAlias '${aliasName}' created.`;
+
+      case 'history':
+        return '    1  neofetch\n    2  apt update\n    3  apt install python\n    4  ls -la\n    5  git clone https://github.com/termux/termux-app\n    6  cd termux-app\n    7  ls\n    8  cat README.md\n    9  apt search node\n   10  history';
+
+      case 'env':
+        return 'SHELL=/data/data/com.termux/files/usr/bin/bash\nTERM=xterm-256color\nTERMUX_VERSION=0.118.0\nHOME=/data/data/com.termux/files/home\nPREFIX=/data/data/com.termux/files/usr\nPATH=/data/data/com.termux/files/usr/bin:/system/bin\nTMPDIR=/data/data/com.termux/files/usr/tmp\nLANG=en_US.UTF-8\nPWD=/data/data/com.termux/files/home\nPKG_CONFIG_PATH=/data/data/com.termux/files/usr/lib/pkgconfig\nLD_LIBRARY_PATH=/data/data/com.termux/files/usr/lib';
+
+      case 'echo':
+        return args.join(' ');
+
+      case 'cat':
+        const filename = args[0] || '.bashrc';
+        if (filename === '.bashrc') {
+          return '# ~/.bashrc: executed by bash(1) for non-login shells\n\n# Enable color support\nif [ -x /usr/bin/dircolors ]; then\n    alias ls=\'ls --color=auto\'\n    alias grep=\'grep --color=auto\'\nfi\n\n# Some useful aliases\nalias ll=\'ls -la\'\nalias la=\'ls -A\'\nalias l=\'ls -CF\'\nalias pkg=\'apt\'\n\n# CVJ Terminal OS customizations\nexport PS1=\'\\[\\033[01;32m\\]cvj@terminal\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ \'\n\necho "Welcome to CVJ Terminal OS v1.0 - Termux Compatible"';
+        }
+        return `cat: ${filename}: No such file or directory`;
+
+      case 'screenfetch':
+        return '                               cvj@cvj-terminal\n      ╭─────────────────────╮       OS: CVJ Terminal OS v1.0\n      │  ████████████████   │       Kernel: aarch64 Linux 5.15.74-android13\n      │  ████████████████   │       Uptime: 2d 4h 20m\n      │  ████████████████   │       Packages: ' + Object.values(PACKAGES_DB).filter(p => p.installed).length + '\n      │  ████████████████   │       Shell: bash 5.1.16\n      │  ████████████████   │       Terminal: CVJ Terminal\n      │  ████████████████   │       CPU: Snapdragon 8 Gen 2 @ 8x 3.2GHz\n      │  ████████████████   │       GPU: Adreno 740\n      │  ████████████████   │       RAM: 4194MB / 12288MB\n      ╰─────────────────────╯       Disk: 94G / 125G (76%)';
+      // Enhanced Package Management - Termux-style APT
       case 'apt':
       case 'apt-get':
         const subCmd = args[0];
         if (subCmd === 'update') {
-          return 'Hit:1 http://deb.debian.org/debian bookworm InRelease\nHit:2 http://deb.debian.org/debian bookworm-updates InRelease\nHit:3 http://security.debian.org/debian-security bookworm-security InRelease\nReading package lists... Done\nBuilding dependency tree... Done\nReading state information... Done\nAll packages are up to date.';
+          const mirrors = TERMUX_MIRRORS.main;
+          let result = '';
+          mirrors.forEach((mirror, index) => {
+            result += `Hit:${index + 1} ${mirror} InRelease\n`;
+          });
+          result += 'Hit:5 https://packages.termux.dev/apt/termux-root InRelease\n';
+          result += 'Hit:6 https://packages.termux.dev/apt/termux-x11 InRelease\n';
+          result += 'Reading package lists... Done\n';
+          result += 'Building dependency tree... Done\n';
+          result += 'Reading state information... Done\n';
+          result += `${Object.keys(PACKAGES_DB).length} packages can be upgraded. Run 'apt list --upgradable' to see them.`;
+          return result;
         }
         if (subCmd === 'upgrade') {
-          return 'Reading package lists... Done\nBuilding dependency tree... Done\nReading state information... Done\nCalculating upgrade... Done\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.';
+          let upgradeCount = Math.floor(Math.random() * 5) + 1;
+          let result = 'Reading package lists... Done\nBuilding dependency tree... Done\nReading state information... Done\n';
+          result += `Calculating upgrade... Done\nThe following packages will be upgraded:\n`;
+          const upgradable = ['openssl', 'bash', 'coreutils', 'grep', 'vim'].slice(0, upgradeCount);
+          result += `  ${upgradable.join(' ')}\n`;
+          result += `${upgradeCount} upgraded, 0 newly installed, 0 to remove and 0 not upgraded.\n`;
+          result += 'Need to get 12.3 MB of archives.\nAfter this operation, 156 kB of additional disk space will be used.\n';
+          upgradable.forEach(pkg => {
+            result += `Get:1 ${TERMUX_MIRRORS.main[0]} ${pkg} [2.1 MB]\n`;
+          });
+          result += 'Fetched 12.3 MB in 3s (4.1 MB/s)\n';
+          upgradable.forEach(pkg => {
+            result += `(Reading database ... 247891 files and directories currently installed.)\n`;
+            result += `Preparing to unpack .../${pkg}_${PACKAGES_DB[pkg]?.version || '1.0.0'}_arm64.deb ...\n`;
+            result += `Unpacking ${pkg} (${PACKAGES_DB[pkg]?.version || '1.0.0'}) over (previous-version) ...\n`;
+            result += `Setting up ${pkg} (${PACKAGES_DB[pkg]?.version || '1.0.0'}) ...\n`;
+          });
+          result += 'Processing triggers for man-db (2.11.2-2) ...\n';
+          return result;
         }
         if (subCmd === 'install') {
           const packages = args.slice(1);
           if (packages.length === 0) return 'apt: no packages specified for installation';
           let result = 'Reading package lists... Done\nBuilding dependency tree... Done\nReading state information... Done\n';
+          
+          const newPackages = [];
+          const alreadyInstalled = [];
+          
           packages.forEach(pkg => {
             if (PACKAGES_DB[pkg]) {
               const info = PACKAGES_DB[pkg];
               if (info.installed) {
-                result += `${pkg} is already the newest version (${info.version}).\n`;
+                alreadyInstalled.push(pkg);
               } else {
-                result += `The following NEW packages will be installed:\n  ${pkg}\n`;
-                result += `Get:1 http://deb.debian.org/debian bookworm/main arm64 ${pkg} ${info.version} [2,345 kB]\n`;
-                result += `Fetched 2,345 kB in 1s (2,345 kB/s)\nSelecting previously unselected package ${pkg}.\n`;
-                result += `(Reading database ... 247891 files and directories currently installed.)\n`;
-                result += `Preparing to unpack .../00-${pkg}_${info.version}_arm64.deb ...\n`;
-                result += `Unpacking ${pkg} (${info.version}) ...\nSetting up ${pkg} (${info.version}) ...\n`;
-                PACKAGES_DB[pkg].installed = true;
+                newPackages.push(pkg);
               }
             } else {
               result += `E: Unable to locate package ${pkg}\n`;
+              return;
             }
           });
+          
+          if (alreadyInstalled.length > 0) {
+            result += `${alreadyInstalled.join(', ')} is already the newest version.\n`;
+          }
+          
+          if (newPackages.length > 0) {
+            result += `The following NEW packages will be installed:\n  ${newPackages.join(' ')}\n`;
+            let totalSize = newPackages.length * 2.3;
+            result += `0 upgraded, ${newPackages.length} newly installed, 0 to remove and 0 not upgraded.\n`;
+            result += `Need to get ${totalSize.toFixed(1)} MB of archives.\n`;
+            result += `After this operation, ${(totalSize * 2.1).toFixed(1)} MB of additional disk space will be used.\n`;
+            
+            newPackages.forEach((pkg, index) => {
+              result += `Get:${index + 1} ${TERMUX_MIRRORS.main[0]} ${pkg} ${PACKAGES_DB[pkg].version} [${(Math.random() * 3 + 1).toFixed(1)} MB]\n`;
+            });
+            
+            result += `Fetched ${totalSize.toFixed(1)} MB in ${Math.ceil(totalSize / 3)}s (${(totalSize / Math.ceil(totalSize / 3)).toFixed(1)} MB/s)\n`;
+            
+            newPackages.forEach(pkg => {
+              result += `Selecting previously unselected package ${pkg}.\n`;
+              result += `(Reading database ... 247891 files and directories currently installed.)\n`;
+              result += `Preparing to unpack .../00-${pkg}_${PACKAGES_DB[pkg].version}_arm64.deb ...\n`;
+              result += `Unpacking ${pkg} (${PACKAGES_DB[pkg].version}) ...\n`;
+            });
+            
+            newPackages.forEach(pkg => {
+              result += `Setting up ${pkg} (${PACKAGES_DB[pkg].version}) ...\n`;
+              PACKAGES_DB[pkg].installed = true;
+              
+              // Add realistic post-install messages
+              if (pkg === 'nodejs') {
+                result += 'Creating symlink: /data/data/com.termux/files/usr/bin/node -> nodejs\n';
+              } else if (pkg === 'nginx') {
+                result += 'Created symlink /data/data/com.termux/files/usr/lib/systemd/system/multi-user.target.wants/nginx.service\n';
+              } else if (pkg === 'python') {
+                result += 'Creating python3 symlink...\n';
+              }
+            });
+            
+            result += 'Processing triggers for man-db (2.11.2-2) ...\n';
+          }
+          
           return result;
         }
-        if (subCmd === 'remove') {
+        if (subCmd === 'remove' || subCmd === 'purge') {
           const packages = args.slice(1);
-          if (packages.length === 0) return 'apt: no packages specified for removal';
+          if (packages.length === 0) return `apt: no packages specified for ${subCmd}`;
           let result = 'Reading package lists... Done\nBuilding dependency tree... Done\nReading state information... Done\n';
+          
+          const toRemove = [];
+          const notInstalled = [];
+          
           packages.forEach(pkg => {
             if (PACKAGES_DB[pkg] && PACKAGES_DB[pkg].installed) {
-              result += `The following packages will be REMOVED:\n  ${pkg}\n`;
+              toRemove.push(pkg);
+            } else {
+              notInstalled.push(pkg);
+            }
+          });
+          
+          if (notInstalled.length > 0) {
+            result += `Package '${notInstalled.join(', ')}' is not installed, so not removed\n`;
+          }
+          
+          if (toRemove.length > 0) {
+            result += `The following packages will be REMOVED:\n  ${toRemove.join(' ')}\n`;
+            result += `0 upgraded, 0 newly installed, ${toRemove.length} to remove and 0 not upgraded.\n`;
+            result += `After this operation, ${(toRemove.length * 5.2).toFixed(1)} MB disk space will be freed.\n`;
+            
+            toRemove.forEach(pkg => {
               result += `(Reading database ... 247891 files and directories currently installed.)\n`;
               result += `Removing ${pkg} (${PACKAGES_DB[pkg].version}) ...\n`;
               PACKAGES_DB[pkg].installed = false;
-            } else {
-              result += `Package '${pkg}' is not installed, so not removed\n`;
+            });
+            
+            if (subCmd === 'purge') {
+              toRemove.forEach(pkg => {
+                result += `Purging configuration files for ${pkg} (${PACKAGES_DB[pkg].version}) ...\n`;
+              });
             }
-          });
+            
+            result += 'Processing triggers for man-db (2.11.2-2) ...\n';
+          }
+          
           return result;
         }
         if (subCmd === 'search') {
           const query = args[1];
           if (!query) return 'apt search: argument required';
           let result = 'Sorting... Done\nFull Text Search... Done\n';
+          let found = 0;
+          
           Object.entries(PACKAGES_DB).forEach(([pkg, info]) => {
-            if (pkg.includes(query) || info.description.includes(query)) {
+            if (pkg.includes(query) || info.description.includes(query) || info.category.includes(query)) {
               const status = info.installed ? '[installed]' : '';
               result += `${pkg}/${info.version} arm64 ${status}\n  ${info.description}\n\n`;
+              found++;
             }
           });
-          return result || `No packages found matching '${query}'`;
+          
+          if (found === 0) {
+            result = `No packages found matching '${query}'`;
+          } else {
+            result = `Sorting... Done\nFull Text Search... Done\n${result}Found ${found} packages.`;
+          }
+          
+          return result;
         }
         if (subCmd === 'list') {
           if (args[1] === '--installed') {
             let result = 'Listing... Done\n';
             Object.entries(PACKAGES_DB).forEach(([pkg, info]) => {
               if (info.installed) {
-                result += `${pkg}/${info.version} arm64 [installed]\n`;
+                result += `${pkg}/${info.version} arm64 [installed,automatic]\n`;
               }
             });
             return result;
           }
-          return 'WARNING: apt does not have a stable CLI interface. Use with caution in scripts.\n\nNOTE: This is only a simulation of apt functionality.';
+          if (args[1] === '--upgradable') {
+            let result = 'Listing... Done\n';
+            const upgradable = ['openssl', 'bash', 'coreutils', 'grep', 'vim'];
+            upgradable.forEach(pkg => {
+              if (PACKAGES_DB[pkg]?.installed) {
+                result += `${pkg}/${PACKAGES_DB[pkg].version} arm64 [upgradable from: previous-version]\n`;
+              }
+            });
+            return result;
+          }
+          return 'WARNING: apt does not have a stable CLI interface. Use with caution in scripts.\n\nUsage: apt list [--installed] [--upgradable] [--all-versions]';
         }
-        return 'Usage: apt <command> [options]\n\nCommands:\n  update - update package index\n  upgrade - upgrade installed packages\n  install <pkg> - install package\n  remove <pkg> - remove package\n  search <term> - search for packages\n  list [--installed] - list packages';
+        if (subCmd === 'show') {
+          const pkg = args[1];
+          if (!pkg) return 'apt show: package name required';
+          if (!PACKAGES_DB[pkg]) return `N: Unable to locate package ${pkg}`;
+          
+          const info = PACKAGES_DB[pkg];
+          return `Package: ${pkg}
+Version: ${info.version}
+Priority: optional
+Section: ${info.category}
+Maintainer: Termux Developers <termux@termux.com>
+Installed-Size: ${Math.floor(Math.random() * 5000 + 1000)} kB
+Depends: libc6 (>= 2.17)
+Homepage: https://termux.dev/packages/${pkg}
+Download-Size: ${Math.floor(Math.random() * 3000 + 500)} kB
+APT-Sources: ${TERMUX_MIRRORS.main[0]} main/binary-arm64/Packages
+Description: ${info.description}
+ This package provides ${pkg} for the Termux environment.
+ Compiled and optimized for Android ARM64 architecture.`;
+        }
+        return 'Usage: apt <command> [options]\n\nCommands:\n  update - update package index from repositories\n  upgrade - upgrade installed packages\n  install <pkg> - install package(s)\n  remove <pkg> - remove package(s)\n  purge <pkg> - remove package(s) and configuration files\n  search <term> - search for packages\n  show <pkg> - show package information\n  list [--installed|--upgradable] - list packages\n  autoremove - remove automatically installed packages\n  autoclean - clean up package cache\n\nTermux Repository Support:\n  Main: ' + TERMUX_MIRRORS.main.length + ' mirrors\n  Root: ' + TERMUX_MIRRORS.root.length + ' mirrors\n  X11: ' + TERMUX_MIRRORS.x11.length + ' mirrors';
 
       // Package Management - DPKG
       case 'dpkg':
