@@ -340,22 +340,47 @@ const PACKAGES_DB = {
   'info': { version: '7.0', description: 'GNU info documentation reader', installed: true, category: 'documentation' },
 };
 
-// Termux-style mirrors and repositories
-const TERMUX_MIRRORS = {
+// Kali Linux mirrors and repositories
+const KALI_MIRRORS = {
   main: [
-    'https://packages.termux.dev/apt/termux-main',
-    'https://termux.mentality.rip/termux-main',
-    'https://mirror.accum.se/mirror/termux-main',
-    'https://packages-cf.termux.dev/apt/termux-main'
+    'http://http.kali.org/kali',
+    'http://kali.download/kali',
+    'http://mirror.kali.org/kali',
+    'http://ftp.halifax.rwth-aachen.de/kali',
+    'http://ftp.acc.umu.se/mirror/kali.org/kali',
+    'http://mirrors.ocf.berkeley.edu/kali'
   ],
-  root: [
-    'https://packages.termux.dev/apt/termux-root',
-    'https://termux.mentality.rip/termux-root'
+  security: [
+    'http://security.kali.org/kali-security'
   ],
-  x11: [
-    'https://packages.termux.dev/apt/termux-x11',
-    'https://termux.mentality.rip/termux-x11'
+  'kali-rolling': [
+    'http://http.kali.org/kali',
+    'http://kali.download/kali'
   ]
+};
+
+// Git repositories for additional tools
+const GIT_REPOSITORIES = {
+  'exploit-db': 'https://github.com/offensive-security/exploitdb.git',
+  'seclist': 'https://github.com/danielmiessler/SecLists.git',
+  'wordlists': 'https://github.com/3ndG4me/KaliLists.git',
+  'payloadsallthethings': 'https://github.com/swisskyrepo/PayloadsAllTheThings.git',
+  'gobuster': 'https://github.com/OJ/gobuster.git',
+  'dirbuster': 'https://github.com/maurosoria/dirsearch.git',
+  'nuclei': 'https://github.com/projectdiscovery/nuclei.git',
+  'subfinder': 'https://github.com/projectdiscovery/subfinder.git',
+  'httpx': 'https://github.com/projectdiscovery/httpx.git',
+  'amass': 'https://github.com/OWASP/Amass.git',
+  'sherlock': 'https://github.com/sherlock-project/sherlock.git',
+  'social-engineer-toolkit': 'https://github.com/trustedsec/social-engineer-toolkit.git',
+  'beef': 'https://github.com/beefproject/beef.git',
+  'empire': 'https://github.com/EmpireProject/Empire.git',
+  'crackmapexec': 'https://github.com/Porchetta-Industries/CrackMapExec.git',
+  'impacket': 'https://github.com/SecureAuthCorp/impacket.git',
+  'bloodhound': 'https://github.com/BloodHoundAD/BloodHound.git',
+  'responder': 'https://github.com/lgandx/Responder.git',
+  'mimikatz': 'https://github.com/gentilkiwi/mimikatz.git',
+  'powersploit': 'https://github.com/PowerShellMafia/PowerSploit.git'
 };
 
 // Working package functionality
@@ -738,8 +763,8 @@ export function TerminalWindow() {
                '  npm install -g create-react-app        # Install Node.js tools\n' +
                '  termux-setup-storage                    # Enable storage access\n' +
                '  pkg install <package>                   # Termux-specific installer\n\n' +
-               'MIRRORS STATUS: ' + TERMUX_MIRRORS.main.length + ' main mirrors, ' + 
-               TERMUX_MIRRORS.root.length + ' root mirrors, ' + TERMUX_MIRRORS.x11.length + ' X11 mirrors';
+                'MIRRORS STATUS: ' + KALI_MIRRORS.main.length + ' main mirrors, ' + 
+                KALI_MIRRORS.security.length + ' security mirrors, ' + KALI_MIRRORS['kali-rolling'].length + ' rolling mirrors';
       
       case 'clear':
         setLines([]);
@@ -880,7 +905,7 @@ export function TerminalWindow() {
         return 'Setting up access to shared storage...\n\nPermission granted to access shared storage.\nShared storage is now available at:\n  ~/storage/shared (shared storage)\n  ~/storage/downloads (downloads folder)\n  ~/storage/dcim (camera pictures)\n  ~/storage/pictures (pictures)\n  ~/storage/music (music)\n  ~/storage/movies (movies)\n\nStorage setup complete!';
 
       case 'termux-info':
-        return 'Termux Environment Information:\n\nTermux version: 0.118.0\nAndroid version: 13 (API level 33)\nKernel version: 5.15.74-android13-8-g6d2a7f9\nArchitecture: aarch64\n\nPaths:\n  TERMUX_APP_PACKAGE: com.termux\n  TERMUX_PREFIX: /data/data/com.termux/files/usr\n  TERMUX_ANDROID_HOME: /data/data/com.termux/files/home\n\nPackage Manager:\n  Mirror count: ' + TERMUX_MIRRORS.main.length + ' mirrors\n  Packages available: ' + Object.keys(PACKAGES_DB).length + '\n  Packages installed: ' + Object.values(PACKAGES_DB).filter(p => p.installed).length + '\n\nCapabilities:\n  ✓ Package installation\n  ✓ Development tools\n  ✓ Network access\n  ✓ Storage access\n  ✓ Root access (with termux-root)\n  ✓ X11 forwarding (with termux-x11)';
+        return 'Kali Linux Environment Information:\n\nKali version: 2024.1 Rolling\nKernel version: 5.15.0-kali2-amd64\nArchitecture: amd64\n\nPaths:\n  KALI_PREFIX: /data/data/com.termux/files/usr\n  KALI_HOME: /data/data/com.termux/files/home\n  TOOLS_DIR: /data/data/com.termux/files/home/tools\n\nPackage Manager:\n  Mirror count: ' + KALI_MIRRORS.main.length + ' mirrors\n  Packages available: ' + Object.keys(PACKAGES_DB).length + '\n  Packages installed: ' + Object.values(PACKAGES_DB).filter(p => p.installed).length + '\n  Git repositories: ' + Object.keys(GIT_REPOSITORIES).length + '\n\nCapabilities:\n  ✓ Security testing tools\n  ✓ Penetration testing\n  ✓ Network analysis\n  ✓ Forensics tools\n  ✓ Git-based tool installation\n  ✓ Kali Linux compatibility';
 
       case 'termux-wake-lock':
         return 'Acquired wake lock - device will not sleep while Termux is running.\nUse "termux-wake-unlock" to release the wake lock.';
@@ -981,7 +1006,7 @@ export function TerminalWindow() {
         return '[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x411fd080]\n[    0.000000] Linux version 5.15.74-android13-8-g6d2a7f9\n[    0.000000] Machine model: Snapdragon 8 Gen 2\n[    0.000000] Memory: 12582912K/12582912K available\n[    1.234567] CVJ Terminal OS initialized\n[    2.345678] Package manager ready: ' + Object.keys(PACKAGES_DB).length + ' packages available\n[    3.456789] Network interfaces up\n[   10.123456] User space started';
 
       case 'journalctl':
-        return `-- Logs begin at Wed 2024-12-18 12:30:00 UTC, end at Wed 2024-12-18 14:30:00 UTC. --\nDec 18 12:30:00 cvj-terminal systemd[1]: Starting CVJ Terminal OS...\nDec 18 12:30:01 cvj-terminal cvj-terminal[1234]: CVJ Terminal OS v1.0 started\nDec 18 12:30:02 cvj-terminal cvj-terminal[1234]: Package database loaded: ${Object.keys(PACKAGES_DB).length} packages\nDec 18 12:30:03 cvj-terminal cvj-terminal[1234]: Mirror status: ${TERMUX_MIRRORS.main.length} mirrors active\nDec 18 14:29:58 cvj-terminal cvj-terminal[1234]: Terminal session started\nDec 18 14:30:00 cvj-terminal cvj-terminal[1234]: User authenticated: cvj`;
+        return `-- Logs begin at Wed 2024-12-18 12:30:00 UTC, end at Wed 2024-12-18 14:30:00 UTC. --\nDec 18 12:30:00 cvj-terminal systemd[1]: Starting CVJ Terminal OS...\nDec 18 12:30:01 cvj-terminal cvj-terminal[1234]: CVJ Terminal OS v1.0 started\nDec 18 12:30:02 cvj-terminal cvj-terminal[1234]: Package database loaded: ${Object.keys(PACKAGES_DB).length} packages\nDec 18 12:30:03 cvj-terminal cvj-terminal[1234]: Mirror status: ${KALI_MIRRORS.main.length} mirrors active\nDec 18 12:30:04 cvj-terminal cvj-terminal[1234]: Git repositories: ${Object.keys(GIT_REPOSITORIES).length} available\nDec 18 14:29:58 cvj-terminal cvj-terminal[1234]: Terminal session started\nDec 18 14:30:00 cvj-terminal cvj-terminal[1234]: User authenticated: cvj`;
 
       case 'watch':
         const watchCmd = args.join(' ') || 'date';
@@ -1034,7 +1059,7 @@ export function TerminalWindow() {
       case 'apt-get':
         const subCmd = args[0];
         if (subCmd === 'update') {
-          const mirrors = TERMUX_MIRRORS.main;
+          const mirrors = KALI_MIRRORS.main;
           let result = '';
           mirrors.forEach((mirror, index) => {
             result += `Hit:${index + 1} ${mirror} InRelease\n`;
@@ -1056,7 +1081,7 @@ export function TerminalWindow() {
           result += `${upgradeCount} upgraded, 0 newly installed, 0 to remove and 0 not upgraded.\n`;
           result += 'Need to get 12.3 MB of archives.\nAfter this operation, 156 kB of additional disk space will be used.\n';
           upgradable.forEach(pkg => {
-            result += `Get:1 ${TERMUX_MIRRORS.main[0]} ${pkg} [2.1 MB]\n`;
+            result += `Get:1 ${KALI_MIRRORS.main[0]} ${pkg} [2.1 MB]\n`;
           });
           result += 'Fetched 12.3 MB in 3s (4.1 MB/s)\n';
           upgradable.forEach(pkg => {
@@ -1102,7 +1127,7 @@ export function TerminalWindow() {
             result += `After this operation, ${(totalSize * 2.1).toFixed(1)} MB of additional disk space will be used.\n`;
             
             newPackages.forEach((pkg, index) => {
-              result += `Get:${index + 1} ${TERMUX_MIRRORS.main[0]} ${pkg} ${PACKAGES_DB[pkg].version} [${(Math.random() * 3 + 1).toFixed(1)} MB]\n`;
+              result += `Get:${index + 1} ${KALI_MIRRORS.main[0]} ${pkg} ${PACKAGES_DB[pkg].version} [${(Math.random() * 3 + 1).toFixed(1)} MB]\n`;
             });
             
             result += `Fetched ${totalSize.toFixed(1)} MB in ${Math.ceil(totalSize / 3)}s (${(totalSize / Math.ceil(totalSize / 3)).toFixed(1)} MB/s)\n`;
@@ -1234,12 +1259,12 @@ Installed-Size: ${Math.floor(Math.random() * 5000 + 1000)} kB
 Depends: libc6 (>= 2.17)
 Homepage: https://termux.dev/packages/${pkg}
 Download-Size: ${Math.floor(Math.random() * 3000 + 500)} kB
-APT-Sources: ${TERMUX_MIRRORS.main[0]} main/binary-arm64/Packages
+APT-Sources: ${KALI_MIRRORS.main[0]} kali-rolling/main/binary-amd64/Packages
 Description: ${info.description}
  This package provides ${pkg} for the Termux environment.
  Compiled and optimized for Android ARM64 architecture.`;
         }
-        return 'Usage: apt <command> [options]\n\nCommands:\n  update - update package index from repositories\n  upgrade - upgrade installed packages\n  install <pkg> - install package(s)\n  remove <pkg> - remove package(s)\n  purge <pkg> - remove package(s) and configuration files\n  search <term> - search for packages\n  show <pkg> - show package information\n  list [--installed|--upgradable] - list packages\n  autoremove - remove automatically installed packages\n  autoclean - clean up package cache\n\nTermux Repository Support:\n  Main: ' + TERMUX_MIRRORS.main.length + ' mirrors\n  Root: ' + TERMUX_MIRRORS.root.length + ' mirrors\n  X11: ' + TERMUX_MIRRORS.x11.length + ' mirrors';
+        return 'Usage: apt <command> [options]\n\nCommands:\n  update - update package index from repositories\n  upgrade - upgrade installed packages\n  install <pkg> - install package(s)\n  remove <pkg> - remove package(s)\n  purge <pkg> - remove package(s) and configuration files\n  search <term> - search for packages\n  show <pkg> - show package information\n  list [--installed|--upgradable] - list packages\n  autoremove - remove automatically installed packages\n  autoclean - clean up package cache\n\nKali Linux Repository Support:\n  Main: ' + KALI_MIRRORS.main.length + ' mirrors\n  Security: ' + KALI_MIRRORS.security.length + ' mirrors\n  Rolling: ' + KALI_MIRRORS['kali-rolling'].length + ' mirrors\n\nGit Tools:\n  git-install <tool> - install from git repositories\n  git-list - list installed git tools';
 
       // Package Management - DPKG
       case 'dpkg':
