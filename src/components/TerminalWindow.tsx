@@ -213,10 +213,10 @@ class VimEditor {
   }
 }
 
-// Enhanced Package Database - Termux-style
-const PACKAGES_DB = {
-  // Core System Tools
-  'bash': { version: '5.1.16', description: 'GNU Bourne Again SHell', installed: true, category: 'shell' },
+  // Enhanced Package Database - Termux-style
+  const PACKAGES_DB = {
+    // Core System Tools
+    'bash': { version: '5.1.16', description: 'GNU Bourne Again SHell', installed: true, category: 'shell' },
   'zsh': { version: '5.9', description: 'Z shell - extended bash with features', installed: false, category: 'shell' },
   'fish': { version: '3.6.1', description: 'friendly interactive shell', installed: false, category: 'shell' },
   'coreutils': { version: '9.1', description: 'GNU core utilities', installed: true, category: 'system' },
@@ -383,6 +383,386 @@ const GIT_REPOSITORIES = {
   'powersploit': 'https://github.com/PowerShellMafia/PowerSploit.git'
 };
 
+// Available Linux distributions with full OS environments
+const AVAILABLE_DISTRIBUTIONS = {
+  'kali': { 
+    name: 'Kali Linux', 
+    version: '2024.1', 
+    description: 'Advanced Penetration Testing Distribution',
+    size: '4.2 GB',
+    category: 'security',
+    architecture: 'aarch64',
+    installed: false,
+    gui_support: true,
+    desktop_environment: 'XFCE',
+    packages: ['aircrack-ng', 'hashcat', 'john', 'hydra', 'metasploit-framework', 'sqlmap', 'nmap', 'wireshark', 'burpsuite', 'firefox', 'terminator']
+  },
+  'blackarch': { 
+    name: 'BlackArch Linux', 
+    version: '2024.04.01', 
+    description: 'Arch Linux-based penetration testing distribution with 2800+ tools',
+    size: '15.7 GB',
+    category: 'security',
+    architecture: 'aarch64',
+    installed: false,
+    gui_support: true,
+    desktop_environment: 'i3wm',
+    packages: ['aircrack-ng', 'hashcat', 'john', 'hydra', 'metasploit-framework', 'sqlmap', 'masscan', 'ncrack', 'firefox', 'code']
+  },
+  'ubuntu': { 
+    name: 'Ubuntu', 
+    version: '22.04.3 LTS', 
+    description: 'Popular Linux distribution for desktop and development',
+    size: '3.8 GB',
+    category: 'general',
+    architecture: 'aarch64',
+    installed: false,
+    gui_support: true,
+    desktop_environment: 'GNOME',
+    packages: ['python3', 'nodejs', 'git', 'vim', 'gcc', 'make', 'firefox', 'libreoffice', 'gimp', 'vlc', 'vscode', 'thunderbird']
+  },
+  'parrot': { 
+    name: 'Parrot Security OS', 
+    version: '5.3', 
+    description: 'Security-focused distribution with privacy tools and AnonSurf',
+    size: '6.1 GB',
+    category: 'security',
+    architecture: 'aarch64',
+    installed: false,
+    gui_support: true,
+    desktop_environment: 'MATE',
+    packages: ['aircrack-ng', 'hashcat', 'john', 'hydra', 'sqlmap', 'nmap', 'wireshark', 'firefox', 'vscode', 'anonsurf', 'tor']
+  },
+  'centos': { 
+    name: 'CentOS Stream', 
+    version: '9', 
+    description: 'Enterprise-class Linux distribution for servers and workstations',
+    size: '3.2 GB',
+    category: 'enterprise',
+    architecture: 'aarch64',
+    installed: false,
+    gui_support: true,
+    desktop_environment: 'GNOME',
+    packages: ['python3', 'nodejs', 'git', 'vim', 'gcc', 'make', 'docker', 'podman', 'httpd', 'nginx']
+  },
+  'debian': { 
+    name: 'Debian', 
+    version: '12 (Bookworm)', 
+    description: 'Universal operating system - the stable base for many distributions',
+    size: '3.0 GB',
+    category: 'general',
+    architecture: 'aarch64',
+    installed: false,
+    gui_support: true,
+    desktop_environment: 'GNOME',
+    packages: ['python3', 'nodejs', 'git', 'vim', 'gcc', 'make', 'firefox', 'gedit', 'thunar', 'synaptic']
+  },
+  'arch': { 
+    name: 'Arch Linux', 
+    version: '2024.01.01', 
+    description: 'Lightweight and flexible Linux distribution following the KISS principle',
+    size: '2.1 GB',
+    category: 'advanced',
+    architecture: 'aarch64',
+    installed: false,
+    gui_support: true,
+    desktop_environment: 'KDE Plasma',
+    packages: ['python3', 'nodejs', 'git', 'vim', 'gcc', 'make', 'firefox', 'vscode', 'terminator', 'pacman']
+  },
+  'fedora': { 
+    name: 'Fedora', 
+    version: '39', 
+    description: 'Cutting-edge Linux distribution with latest technologies',
+    size: '4.1 GB',
+    category: 'general',
+    architecture: 'aarch64',
+    installed: false,
+    gui_support: true,
+    desktop_environment: 'GNOME',
+    packages: ['python3', 'nodejs', 'git', 'vim', 'gcc', 'make', 'firefox', 'vscode', 'dnf', 'podman']
+  },
+  'opensuse': { 
+    name: 'openSUSE Tumbleweed', 
+    version: 'Rolling', 
+    description: 'Professional Linux distribution with YaST configuration tool',
+    size: '4.5 GB',
+    category: 'enterprise',
+    architecture: 'aarch64',
+    installed: false,
+    gui_support: true,
+    desktop_environment: 'KDE Plasma',
+    packages: ['python3', 'nodejs', 'git', 'vim', 'gcc', 'make', 'firefox', 'yast2', 'zypper']
+  }
+};
+
+// GUI Applications Database
+const GUI_APPLICATIONS = {
+  // Web Browsers
+  'firefox': { name: 'Mozilla Firefox', category: 'web', size: '234.7 MB', description: 'Open-source web browser', gui: true },
+  'chromium': { name: 'Chromium', category: 'web', size: '189.3 MB', description: 'Open-source web browser', gui: true },
+  'brave': { name: 'Brave Browser', category: 'web', size: '267.1 MB', description: 'Privacy-focused web browser', gui: true },
+  
+  // Development Tools
+  'vscode': { name: 'Visual Studio Code', category: 'development', size: '267.4 MB', description: 'Source code editor', gui: true },
+  'sublime': { name: 'Sublime Text', category: 'development', size: '45.2 MB', description: 'Sophisticated text editor', gui: true },
+  'atom': { name: 'Atom', category: 'development', size: '123.8 MB', description: 'Hackable text editor', gui: true },
+  'gedit': { name: 'Text Editor', category: 'development', size: '12.4 MB', description: 'Simple text editor', gui: true },
+  
+  // Office & Productivity
+  'libreoffice': { name: 'LibreOffice', category: 'office', size: '345.2 MB', description: 'Office productivity suite', gui: true },
+  'thunderbird': { name: 'Thunderbird', category: 'office', size: '156.3 MB', description: 'Email client', gui: true },
+  'evince': { name: 'Document Viewer', category: 'office', size: '23.1 MB', description: 'PDF and document viewer', gui: true },
+  
+  // Graphics & Multimedia
+  'gimp': { name: 'GIMP', category: 'graphics', size: '156.8 MB', description: 'GNU Image Manipulation Program', gui: true },
+  'inkscape': { name: 'Inkscape', category: 'graphics', size: '89.2 MB', description: 'Vector graphics editor', gui: true },
+  'vlc': { name: 'VLC Media Player', category: 'multimedia', size: '78.9 MB', description: 'Multimedia player', gui: true },
+  'audacity': { name: 'Audacity', category: 'multimedia', size: '34.5 MB', description: 'Audio editor', gui: true },
+  
+  // System Tools
+  'terminator': { name: 'Terminator', category: 'system', size: '8.7 MB', description: 'Advanced terminal emulator', gui: true },
+  'thunar': { name: 'Thunar', category: 'system', size: '15.2 MB', description: 'File manager', gui: true },
+  'synaptic': { name: 'Synaptic', category: 'system', size: '34.1 MB', description: 'Package manager GUI', gui: true },
+  'gparted': { name: 'GParted', category: 'system', size: '23.4 MB', description: 'Partition editor', gui: true },
+  
+  // Security Tools (GUI)
+  'wireshark': { name: 'Wireshark', category: 'security', size: '89.4 MB', description: 'Network protocol analyzer (GUI)', gui: true },
+  'burpsuite': { name: 'Burp Suite Community', category: 'security', size: '145.3 MB', description: 'Web security testing platform', gui: true },
+  'zenmap': { name: 'Zenmap', category: 'security', size: '23.8 MB', description: 'Nmap GUI frontend', gui: true },
+  
+  // Desktop Environments
+  'gnome': { name: 'GNOME Desktop', category: 'desktop', size: '678.2 MB', description: 'Modern desktop environment', gui: true },
+  'kde': { name: 'KDE Plasma', category: 'desktop', size: '567.8 MB', description: 'Feature-rich desktop environment', gui: true },
+  'xfce': { name: 'XFCE Desktop', category: 'desktop', size: '234.5 MB', description: 'Lightweight desktop environment', gui: true },
+  'mate': { name: 'MATE Desktop', category: 'desktop', size: '345.6 MB', description: 'Traditional desktop environment', gui: true },
+  'i3': { name: 'i3 Window Manager', category: 'desktop', size: '12.3 MB', description: 'Tiling window manager', gui: true }
+};
+
+// Display Server Manager
+class DisplayManager {
+  private static instance: DisplayManager;
+  private isRunning = false;
+  private currentSession: string | null = null;
+  private installedApps: Set<string> = new Set();
+
+  static getInstance() {
+    if (!DisplayManager.instance) {
+      DisplayManager.instance = new DisplayManager();
+    }
+    return DisplayManager.instance;
+  }
+
+  startX11(): string {
+    if (this.isRunning) {
+      return 'X11 server is already running on display :0';
+    }
+    this.isRunning = true;
+    this.currentSession = 'X11';
+    return `Starting X11 server...\n✓ X11 server started on display :0\n✓ Hardware acceleration enabled\n✓ Touch input configured\n✓ Ready for GUI applications`;
+  }
+
+  startWayland(): string {
+    if (this.isRunning) {
+      return 'Wayland compositor is already running';
+    }
+    this.isRunning = true;
+    this.currentSession = 'Wayland';
+    return `Starting Wayland compositor...\n✓ Wayland session started\n✓ Hardware acceleration enabled\n✓ Multi-touch gestures enabled\n✓ Ready for GUI applications`;
+  }
+
+  launchApp(appName: string): string {
+    if (!this.isRunning) {
+      return `Cannot launch ${appName}: No display server running. Use 'startx' or 'start-wayland' first.`;
+    }
+    
+    if (!GUI_APPLICATIONS[appName]) {
+      return `Application '${appName}' not found or not a GUI application.`;
+    }
+
+    if (!this.installedApps.has(appName)) {
+      return `Application '${appName}' is not installed. Install it first with: apt install ${appName}`;
+    }
+
+    const app = GUI_APPLICATIONS[appName];
+    return `Launching ${app.name}...\n✓ Application window opened\n✓ Running on ${this.currentSession} display server\n✓ PID: ${Math.floor(Math.random() * 9000) + 1000}`;
+  }
+
+  installGuiApp(appName: string): boolean {
+    if (GUI_APPLICATIONS[appName]) {
+      this.installedApps.add(appName);
+      return true;
+    }
+    return false;
+  }
+
+  getStatus(): string {
+    if (!this.isRunning) {
+      return 'No display server running. Available commands:\n  startx     - Start X11 server\n  start-wayland - Start Wayland compositor';
+    }
+    
+    return `Display Server Status:\n✓ ${this.currentSession} server running on display :0\n✓ Hardware acceleration: Enabled\n✓ Touch input: Configured\n✓ Installed GUI apps: ${this.installedApps.size}\n\nLaunch apps with: launch-app <name>`;
+  }
+
+  stopDisplay(): string {
+    if (!this.isRunning) {
+      return 'No display server is currently running.';
+    }
+    
+    const session = this.currentSession;
+    this.isRunning = false;
+    this.currentSession = null;
+    return `Stopping ${session} display server...\n✓ All GUI applications closed\n✓ Display server stopped\n✓ Resources freed`;
+  }
+}
+
+// OS Distribution Manager
+class DistributionManager {
+  private static instance: DistributionManager;
+  private currentDistro: string = 'cvj-base';
+  private installedDistros: Set<string> = new Set(['cvj-base']);
+
+  static getInstance() {
+    if (!DistributionManager.instance) {
+      DistributionManager.instance = new DistributionManager();
+    }
+    return DistributionManager.instance;
+  }
+
+  installDistribution(distroName: string): string {
+    if (!AVAILABLE_DISTRIBUTIONS[distroName]) {
+      return `Error: Distribution '${distroName}' not found.\nAvailable distributions: ${Object.keys(AVAILABLE_DISTRIBUTIONS).join(', ')}`;
+    }
+
+    if (this.installedDistros.has(distroName)) {
+      return `Distribution '${distroName}' is already installed.`;
+    }
+
+    const distro = AVAILABLE_DISTRIBUTIONS[distroName];
+    let output = `Installing ${distro.name} ${distro.version}...\n`;
+    output += `Downloading ${distro.size} from mirror...\n`;
+    output += `[████████████████████████████████████████] 100%\n`;
+    output += `Extracting system files...\n`;
+    output += `Setting up ${distro.desktop_environment} desktop environment...\n`;
+    output += `Installing ${distro.packages.length} core packages...\n`;
+    
+    // Install the distribution's packages
+    const packageManager = PackageManager.getInstance();
+    const displayManager = DisplayManager.getInstance();
+    
+    distro.packages.forEach(pkg => {
+      if (PACKAGES_DB[pkg]) {
+        packageManager.install(pkg);
+      }
+      if (GUI_APPLICATIONS[pkg]) {
+        displayManager.installGuiApp(pkg);
+      }
+    });
+
+    this.installedDistros.add(distroName);
+    AVAILABLE_DISTRIBUTIONS[distroName].installed = true;
+    
+    output += `✓ ${distro.name} installation completed\n`;
+    output += `✓ Desktop environment: ${distro.desktop_environment}\n`;
+    output += `✓ GUI support: ${distro.gui_support ? 'Enabled' : 'Disabled'}\n`;
+    output += `✓ Packages installed: ${distro.packages.length}\n`;
+    output += `\nSwitch to this distribution with: switch-os ${distroName}`;
+    
+    return output;
+  }
+
+  switchDistribution(distroName: string): string {
+    if (!this.installedDistros.has(distroName)) {
+      return `Error: Distribution '${distroName}' is not installed.\nInstall it first with: install-os ${distroName}`;
+    }
+
+    if (this.currentDistro === distroName) {
+      return `Already running ${distroName === 'cvj-base' ? 'CVJ Terminal OS Base' : AVAILABLE_DISTRIBUTIONS[distroName].name}`;
+    }
+
+    const prevDistro = this.currentDistro;
+    this.currentDistro = distroName;
+    
+    if (distroName === 'cvj-base') {
+      return `Switched to CVJ Terminal OS Base\n✓ Lightweight terminal environment\n✓ All tools available via package manager`;
+    }
+
+    const distro = AVAILABLE_DISTRIBUTIONS[distroName];
+    let output = `Switching to ${distro.name}...\n`;
+    output += `✓ Environment updated\n`;
+    output += `✓ Desktop: ${distro.desktop_environment}\n`;
+    output += `✓ Package manager configured\n`;
+    output += `✓ ${distro.packages.length} tools available\n`;
+    
+    if (distro.gui_support) {
+      output += `\nGUI Support Available:\n`;
+      output += `  startx        - Start X11 desktop\n`;
+      output += `  start-wayland - Start Wayland session\n`;
+      output += `  launch-app    - Launch GUI applications`;
+    }
+    
+    return output;
+  }
+
+  listDistributions(): string {
+    let output = 'Available Linux Distributions:\n\n';
+    
+    Object.entries(AVAILABLE_DISTRIBUTIONS).forEach(([key, distro]) => {
+      const status = this.installedDistros.has(key) ? 
+        (this.currentDistro === key ? '[ACTIVE]' : '[INSTALLED]') : '[NOT INSTALLED]';
+      
+      output += `${key.padEnd(12)} ${status.padEnd(15)} ${distro.name} ${distro.version}\n`;
+      output += `${' '.repeat(28)} ${distro.description}\n`;
+      output += `${' '.repeat(28)} Size: ${distro.size} | GUI: ${distro.gui_support ? 'Yes' : 'No'} | DE: ${distro.desktop_environment}\n\n`;
+    });
+    
+    output += `Commands:\n`;
+    output += `  install-os <name>  - Install a distribution\n`;
+    output += `  switch-os <name>   - Switch to installed distribution\n`;
+    output += `  remove-os <name>   - Remove installed distribution\n`;
+    output += `  current-os         - Show current distribution info`;
+    
+    return output;
+  }
+
+  getCurrentInfo(): string {
+    if (this.currentDistro === 'cvj-base') {
+      return `Current: CVJ Terminal OS Base\n✓ Lightweight terminal environment\n✓ All major Linux tools available\n✓ Package manager: APT compatible\n✓ Architecture: aarch64`;
+    }
+
+    const distro = AVAILABLE_DISTRIBUTIONS[this.currentDistro];
+    let output = `Current Distribution: ${distro.name} ${distro.version}\n`;
+    output += `Description: ${distro.description}\n`;
+    output += `Category: ${distro.category}\n`;
+    output += `Architecture: ${distro.architecture}\n`;
+    output += `Desktop Environment: ${distro.desktop_environment}\n`;
+    output += `GUI Support: ${distro.gui_support ? 'Enabled' : 'Disabled'}\n`;
+    output += `Installed Packages: ${distro.packages.length}\n`;
+    output += `Storage Used: ${distro.size}`;
+    
+    return output;
+  }
+
+  removeDistribution(distroName: string): string {
+    if (distroName === 'cvj-base') {
+      return 'Cannot remove CVJ Terminal OS Base - it\'s the core system.';
+    }
+
+    if (!this.installedDistros.has(distroName)) {
+      return `Distribution '${distroName}' is not installed.`;
+    }
+
+    if (this.currentDistro === distroName) {
+      this.currentDistro = 'cvj-base';
+    }
+
+    this.installedDistros.delete(distroName);
+    AVAILABLE_DISTRIBUTIONS[distroName].installed = false;
+    
+    const distro = AVAILABLE_DISTRIBUTIONS[distroName];
+    return `Removed ${distro.name}\n✓ ${distro.size} storage freed\n✓ Switched back to CVJ Terminal OS Base`;
+  }
+}
+
 // Working package functionality
 class PackageManager {
   private static instance: PackageManager;
@@ -490,6 +870,8 @@ export function TerminalWindow() {
   // Initialize working systems
   const fs = useRef(new VirtualFileSystem()).current;
   const packageManager = useRef(PackageManager.getInstance()).current;
+  const distributionManager = useRef(DistributionManager.getInstance()).current;
+  const displayManager = useRef(DisplayManager.getInstance()).current;
   const networkClient = useRef(new NetworkClient()).current;
 
   // Helper functions for package management
@@ -504,9 +886,18 @@ export function TerminalWindow() {
         if (PACKAGES_DB[pkg]) {
           if (packageManager.install(pkg)) {
             result += `✓ ${pkg} installed and fully functional!\n`;
+            // Also install GUI version if available
+            if (GUI_APPLICATIONS[pkg]) {
+              displayManager.installGuiApp(pkg);
+              result += `✓ ${pkg} GUI support enabled\n`;
+            }
           } else {
             result += `${pkg} is already installed.\n`;
           }
+        } else if (GUI_APPLICATIONS[pkg]) {
+          // Install GUI-only application
+          displayManager.installGuiApp(pkg);
+          result += `✓ ${pkg} (GUI application) installed and ready!\n`;
         } else {
           result += `E: Unable to locate package ${pkg}\n`;
         }
@@ -1370,6 +1761,159 @@ Description: ${info.description}
           return `Unable to find image '${image}:latest' locally\nlatest: Pulling from library/${image}\nPull complete\nStarting container...`;
         }
         return 'Usage:  docker [OPTIONS] COMMAND\n\nA self-sufficient runtime for containers\n\nManagement Commands:\n  container   Manage containers\n  image       Manage images\n  network     Manage networks\n  volume      Manage volumes\n\nCommands:\n  attach      Attach local standard input, output, and error streams to a running container\n  build       Build an image from a Dockerfile\n  commit      Create a new image from a container\'s changes\n  cp          Copy files/folders between a container and the local filesystem\n  create      Create a new container\n  diff        Inspect changes to files or directories on a container\'s filesystem\n  events      Get real time events from the server\n  exec        Run a command in a running container\n  export      Export a container\'s filesystem as a tar archive\n  history     Show the history of an image\n  images      List images\n  import      Import the contents from a tarball to create a filesystem image\n  info        Display system-wide information\n  inspect     Return low-level information on Docker objects\n  kill        Kill one or more running containers\n  load        Load an image from a tar archive or STDIN\n  login       Log in to a Docker registry\n  logout      Log out from a Docker registry\n  logs        Fetch the logs of a container\n  pause       Pause all processes within one or more containers\n  port        List port mappings or a specific mapping for the container\n  ps          List containers\n  pull        Pull an image or a repository from a registry\n  push        Push an image or a repository to a registry\n  rename      Rename a container\n  restart     Restart one or more containers\n  rm          Remove one or more containers\n  rmi         Remove one or more images\n  run         Run a command in a new container\n  save        Save one or more images to a tar archive (streamed to STDOUT by default)\n  search      Search the Docker Hub for images\n  start       Start one or more stopped containers\n  stats       Display a live stream of container(s) resource usage statistics\n  stop        Stop one or more running containers\n  tag         Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE\n  top         Display the running processes of a container\n  unpause     Unpause all processes within one or more containers\n  update      Update configuration of one or more containers\n  version     Show the Docker version information\n  wait        Block until one or more containers stop, then print their exit codes';
+
+      // ============= OS DISTRIBUTION MANAGEMENT =============
+      case 'list-os':
+      case 'os-list':
+        return DistributionManager.getInstance().listDistributions();
+
+      case 'install-os':
+        const distroToInstall = args[0];
+        if (!distroToInstall) {
+          return 'Usage: install-os <distribution-name>\n\nAvailable distributions:\n' + 
+                 Object.keys(AVAILABLE_DISTRIBUTIONS).map(k => `  ${k.padEnd(12)} - ${AVAILABLE_DISTRIBUTIONS[k].name}`).join('\n') +
+                 '\n\nExample: install-os kali';
+        }
+        return DistributionManager.getInstance().installDistribution(distroToInstall);
+
+      case 'switch-os':
+      case 'use-os':
+        const distroToSwitch = args[0];
+        if (!distroToSwitch) {
+          return 'Usage: switch-os <distribution-name>\n\nInstalled distributions:\n' + 
+                 Object.keys(AVAILABLE_DISTRIBUTIONS)
+                   .filter(k => AVAILABLE_DISTRIBUTIONS[k].installed)
+                   .map(k => `  ${k.padEnd(12)} - ${AVAILABLE_DISTRIBUTIONS[k].name}`)
+                   .join('\n') + '\ncvj-base      - CVJ Terminal OS Base\n\nExample: switch-os kali';
+        }
+        return DistributionManager.getInstance().switchDistribution(distroToSwitch);
+
+      case 'remove-os':
+      case 'uninstall-os':
+        const distroToRemove = args[0];
+        if (!distroToRemove) {
+          return 'Usage: remove-os <distribution-name>\n\nInstalled distributions:\n' + 
+                 Object.keys(AVAILABLE_DISTRIBUTIONS)
+                   .filter(k => AVAILABLE_DISTRIBUTIONS[k].installed)
+                   .map(k => `  ${k.padEnd(12)} - ${AVAILABLE_DISTRIBUTIONS[k].name}`)
+                   .join('\n') + '\n\nExample: remove-os kali';
+        }
+        return DistributionManager.getInstance().removeDistribution(distroToRemove);
+
+      case 'current-os':
+      case 'os-info':
+        return DistributionManager.getInstance().getCurrentInfo();
+
+      // ============= GUI DISPLAY MANAGEMENT =============
+      case 'startx':
+      case 'start-x11':
+        return DisplayManager.getInstance().startX11();
+
+      case 'start-wayland':
+      case 'wayland':
+        return DisplayManager.getInstance().startWayland();
+
+      case 'display-status':
+      case 'gui-status':
+        return DisplayManager.getInstance().getStatus();
+
+      case 'stop-display':
+      case 'stop-gui':
+        return DisplayManager.getInstance().stopDisplay();
+
+      case 'launch-app':
+      case 'run-gui':
+        const appToLaunch = args[0];
+        if (!appToLaunch) {
+          const availableApps = Object.keys(GUI_APPLICATIONS);
+          return 'Usage: launch-app <application-name>\n\nAvailable GUI applications:\n' +
+                 availableApps.map(app => {
+                   const info = GUI_APPLICATIONS[app];
+                   return `  ${app.padEnd(15)} - ${info.name} (${info.category})`;
+                 }).join('\n') + '\n\nExample: launch-app firefox';
+        }
+        return DisplayManager.getInstance().launchApp(appToLaunch);
+
+      case 'list-gui':
+      case 'gui-apps':
+        let guiList = 'Available GUI Applications:\n\n';
+        const categories = [...new Set(Object.values(GUI_APPLICATIONS).map(app => app.category))];
+        
+        categories.forEach(category => {
+          guiList += `${category.toUpperCase()}:\n`;
+          Object.entries(GUI_APPLICATIONS)
+            .filter(([_, app]) => app.category === category)
+            .forEach(([key, app]) => {
+              const installed = DisplayManager.getInstance()['installedApps']?.has(key) ? '✓' : '○';
+              guiList += `  ${installed} ${key.padEnd(15)} - ${app.name} (${app.size})\n`;
+            });
+          guiList += '\n';
+        });
+        
+        guiList += 'Commands:\n';
+        guiList += '  startx           - Start X11 display server\n';
+        guiList += '  start-wayland    - Start Wayland compositor\n';
+        guiList += '  launch-app <app> - Launch GUI application\n';
+        guiList += '  display-status   - Check display server status\n';
+        guiList += '  apt install <app> - Install GUI application';
+        
+        return guiList;
+
+      // ============= ENHANCED SYSTEM INFORMATION =============
+      case 'neofetch':
+        const currentDistro = DistributionManager.getInstance()['currentDistro'];
+        const distroInfo = currentDistro === 'cvj-base' ? 
+          { name: 'CVJ Terminal OS', version: '1.0.0' } : 
+          AVAILABLE_DISTRIBUTIONS[currentDistro];
+        
+        return `
+                    .=+*#%%@@@@@@@%%#*+=.                 cvj@terminal-os
+                 -*%@@@@@@@@@@@@@@@@@@@@%*-              ---------------
+              .+%@@@@@@@%%%%%%%%%%%@@@@@@@%+.           OS: ${distroInfo.name} ${distroInfo.version}
+            .*@@@@@@%*+=========+*%@@@@@@*.            Host: CVJ Terminal OS
+           =@@@@@@*=               =*@@@@@@=           Kernel: 5.15.74-android13
+          #@@@@%+=                   =+%@@@@#          Uptime: 2 days, 4 hours
+         *@@@@*=                       =*@@@@*         Packages: ${Object.values(PACKAGES_DB).filter(p => p.installed).length} (APT)
+        +@@@@+=                         =+@@@@+        Shell: bash 5.1.16
+       =@@@@*                             *@@@@=       Resolution: 2400x1080
+       %@@@%                               %@@@%       DE: ${currentDistro !== 'cvj-base' ? AVAILABLE_DISTRIBUTIONS[currentDistro].desktop_environment : 'Terminal Only'}
+      =@@@@+                               +@@@@=      Terminal: CVJ Terminal
+      %@@@%                                 %@@@%      CPU: Snapdragon 8 Gen 2 (8) @ 3.2GHz
+      @@@@@                                 @@@@@      GPU: Adreno 740
+      %@@@%                                 %@@@%      Memory: 4096MiB / 12288MiB
+      =@@@@+                               +@@@@=      Storage: 94GB / 125GB (76%)
+       %@@@%                               %@@@%       
+       =@@@@*                             *@@@@=       
+        +@@@@+=                         =+@@@@+        
+         *@@@@*=                       =*@@@@*         
+          #@@@@%+=                   =+%@@@@#          
+           =@@@@@@*=               =*@@@@@@=           
+            .*@@@@@@%*+=========+*%@@@@@@*.            
+              .+%@@@@@@@%%%%%%%%%%%@@@@@@@%+.          
+                 -*%@@@@@@@@@@@@@@@@@@@@%*-             
+                    .=+*#%%@@@@@@@%%#*+=.               
+`;
+
+      case 'screenfetch':
+        return `
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    User: cvj
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    Hostname: terminal-os
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    OS: CVJ Terminal OS 1.0.0
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    Kernel: aarch64 Linux 5.15.74-android13
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    Uptime: 2d 4h 20m
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    Packages: ${Object.values(PACKAGES_DB).filter(p => p.installed).length}
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    Shell: bash
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    Resolution: 2400x1080
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    DE: Terminal Environment
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    WM: CVJ Terminal Manager
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    GTK Theme: Dark
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    Icon Theme: Adwaita
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    Font: JetBrains Mono
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    CPU: Snapdragon 8 Gen 2 @ 8x 3.2GHz
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    GPU: Adreno 740
+         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    RAM: 4096MB / 12288MB
+`;
 
       default:
         // Check if it looks like a common command with typo
