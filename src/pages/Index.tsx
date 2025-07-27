@@ -72,13 +72,13 @@ const Index = () => {
               Working Title - In Development
             </Badge>
             
-            <h1 className="text-6xl md:text-8xl font-bold mb-6 font-cyber">
+            <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold mb-6 font-cyber">
               <span className="cyber-text">CVJ</span>
               <br />
               <span className="text-terminal-green">Terminal OS</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto px-4">
               Hybrid Android app combining powerful <span className="text-terminal-cyan">Linux CLI</span> with 
               modern <span className="text-accent">GUI dashboard</span> for the ultimate mobile terminal experience.
             </p>

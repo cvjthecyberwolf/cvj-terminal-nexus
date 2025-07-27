@@ -122,6 +122,28 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-mono;
+    /* Mobile optimizations */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    overscroll-behavior: none;
+  }
+  
+  /* Mobile viewport fixes */
+  html {
+    height: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, textarea, select {
+    font-size: 16px;
+  }
+  
+  /* Mobile keyboard compatibility */
+  .mobile-keyboard-safe {
+    padding-bottom: env(keyboard-inset-height, 0);
   }
 }
 
