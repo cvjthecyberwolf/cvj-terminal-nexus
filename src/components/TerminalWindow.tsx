@@ -3,6 +3,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { fileSystem } from "@/lib/fileSystem";
 import { unixCommands, CommandResult } from "@/lib/unixCommands";
 import { packageManager } from "@/lib/packageManager";
+import { NativePackageManager } from "@/lib/nativePackageManager";
+import { AndroidShell } from "@/lib/nativeShell";
+import { Capacitor } from "@capacitor/core";
 
 interface TerminalLine {
   text: string;
@@ -30,6 +33,25 @@ const TerminalWindow = () => {
     const initFileSystem = async () => {
       try {
         await fileSystem.init();
+        
+        // Setup native environment if on mobile
+        if (Capacitor.isNativePlatform()) {
+          const setupResult = await AndroidShell.setupLinuxEnvironment();
+          addLine("📱 Running on native Android platform", 'output');
+          addLine("🔧 Setting up Linux environment...", 'output');
+          addLine(setupResult.output, setupResult.exitCode === 0 ? 'output' : 'error');
+          
+          // Check for root access
+          const hasRoot = await AndroidShell.checkRootAccess();
+          if (hasRoot) {
+            addLine("🔓 Root access available - all tools enabled", 'output');
+          } else {
+            addLine("⚠️ No root access - some tools may be limited", 'output');
+          }
+        } else {
+          addLine("🌐 Running in web mode - build Android app for real tools", 'output');
+        }
+        
         setIsInitialized(true);
         addLine("✅ Real file system initialized successfully!", 'output');
         addLine("✅ Real Unix commands available with persistent storage", 'output');
@@ -109,8 +131,8 @@ const TerminalWindow = () => {
         addLine("  apt update        - Update package repositories", 'output');
         addLine("  apt install <pkg> - Install packages (nmap, metasploit, etc.)", 'output');
         addLine("  apt search <term> - Search available packages", 'output');
-        addLine("  pkg-info <name>   - Show package information", 'output');
-        addLine("  pkg-list          - List installed packages", 'output');
+        addLine("  install <tool>    - Install real security tools", 'output');
+        addLine("  setup-kali        - Setup Kali Linux repository", 'output');
         addLine("  install-url <url> - Install from direct URL", 'output');
         addLine("", 'output');
         addLine("ℹ️ System Information:", 'output');
@@ -127,13 +149,38 @@ const TerminalWindow = () => {
         setLines([]);
         break;
 
+      case 'install':
+        if (args.length === 0) {
+          addLine("Usage: install <tool-name>", 'error');
+          addLine("Examples: install wireshark, install nmap, install metasploit", 'error');
+          break;
+        }
+        try {
+          addLine(`🔧 Installing ${args[0]}...`, 'output');
+          const result = await NativePackageManager.installRealPackage(args[0]);
+          addLine(result, result.includes('✅') ? 'output' : 'error');
+        } catch (error) {
+          addLine(`❌ Installation failed: ${error}`, 'error');
+        }
+        break;
+
+      case 'setup-kali':
+        try {
+          addLine("🔧 Setting up Kali Linux repository...", 'output');
+          const result = await NativePackageManager.setupKaliRepository();
+          addLine(result, result.includes('✅') ? 'output' : 'error');
+        } catch (error) {
+          addLine(`❌ Setup failed: ${error}`, 'error');
+        }
+        break;
+
       case 'pkg-search':
         if (args.length === 0) {
           addLine("Usage: pkg-search <query>", 'error');
           break;
         }
         try {
-          const packages = await packageManager.searchPackages(args[0]);
+          const packages = await NativePackageManager.searchPackages(args[0]);
           if (packages.length === 0) {
             addLine(`No packages found matching '${args[0]}'`, 'output');
           } else {
@@ -148,22 +195,9 @@ const TerminalWindow = () => {
         }
         break;
 
-      case 'pkg-install':
-        if (args.length === 0) {
-          addLine("Usage: pkg-install <package-name>", 'error');
-          break;
-        }
-        try {
-          const result = await packageManager.installPackage(args[0]);
-          addLine(result, 'output');
-        } catch (error) {
-          addLine(`Error installing package: ${error}`, 'error');
-        }
-        break;
-
       case 'pkg-list':
         try {
-          const packages = await packageManager.listInstalledPackages();
+          const packages = await NativePackageManager.listInstalledTools();
           if (packages.length === 0) {
             addLine("No packages installed", 'output');
           } else {
@@ -177,19 +211,6 @@ const TerminalWindow = () => {
         }
         break;
 
-      case 'pkg-info':
-        if (args.length === 0) {
-          addLine("Usage: pkg-info <package-name>", 'error');
-          break;
-        }
-        try {
-          const info = await packageManager.getPackageInfo(args[0]);
-          addLine(info, 'output');
-        } catch (error) {
-          addLine(`Error getting package info: ${error}`, 'error');
-        }
-        break;
-
       case 'install-url':
         if (args.length === 0) {
           addLine("Usage: install-url <url> [package-name]", 'error');
@@ -197,8 +218,8 @@ const TerminalWindow = () => {
         }
         try {
           addLine(`📥 Downloading and installing from ${args[0]}...`, 'output');
-          const result = await packageManager.downloadAndInstallFromUrl(args[0], args[1]);
-          addLine(`✅ ${result}`, 'output');
+          const result = await NativePackageManager.installFromUrl(args[0], args[1]);
+          addLine(result, result.includes('✅') ? 'output' : 'error');
         } catch (error) {
           addLine(`❌ Error installing from URL: ${error}`, 'error');
         }

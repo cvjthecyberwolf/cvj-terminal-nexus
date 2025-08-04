@@ -1,4 +1,6 @@
 import { fileSystem } from './fileSystem';
+import { AndroidShell } from './nativeShell';
+import { Capacitor } from '@capacitor/core';
 
 export interface CommandResult {
   output: string;
@@ -19,6 +21,12 @@ export class UnixCommands {
   };
 
   async ls(args: string[] = []): Promise<CommandResult> {
+    // Use native shell when available, otherwise fall back to simulation
+    if (Capacitor.isNativePlatform()) {
+      return await AndroidShell.executeCommand('ls', args);
+    }
+    
+    // Web fallback - existing simulation code
     try {
       const flags = args.filter(arg => arg.startsWith('-'));
       const paths = args.filter(arg => !arg.startsWith('-'));

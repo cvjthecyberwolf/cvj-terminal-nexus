@@ -9,6 +9,10 @@ const config: CapacitorConfig = {
     cleartext: true
   },
   plugins: {
+    NativeShell: {
+      requestPermissions: true,
+      enableRootAccess: true
+    },
     SplashScreen: {
       launchShowDuration: 3000,
       launchAutoHide: true,
