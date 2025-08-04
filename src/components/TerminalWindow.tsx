@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { fileSystem } from "@/lib/fileSystem";
 import { unixCommands, CommandResult } from "@/lib/unixCommands";
 import { packageManager } from "@/lib/packageManager";
@@ -23,7 +23,7 @@ const TerminalWindow = () => {
   const [currentDir, setCurrentDir] = useState("/home/kali");
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
 
   // Initialize the real file system
   useEffect(() => {

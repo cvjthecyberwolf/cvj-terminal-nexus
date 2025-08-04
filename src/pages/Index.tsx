@@ -1,4 +1,4 @@
-import { TerminalWindow } from "@/components/TerminalWindow";
+import TerminalWindow from "@/components/TerminalWindow";
 import { FeatureCard } from "@/components/FeatureCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
