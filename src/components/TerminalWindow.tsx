@@ -326,3 +326,4 @@ const TerminalWindow = () => {
 };
 
 export default TerminalWindow;
+// Fixed export
