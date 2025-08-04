@@ -295,7 +295,7 @@ const TerminalWindow = () => {
   }, [lines, isMobile]);
 
   const getPrompt = () => {
-    const user = "kali";
+    const user = "cvj";
     const hostname = "terminal";
     const dir = currentDir === "/home/kali" ? "~" : currentDir;
     return `${user}@${hostname}:${dir}$ `;
