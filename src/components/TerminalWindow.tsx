@@ -127,7 +127,15 @@ const TerminalWindow = () => {
         addLine("  grep <pattern> <file> - Search in files", 'output');
         addLine("  wget <url>        - Download files from internet", 'output');
         addLine("", 'output');
-        addLine("📦 Real Package Management:", 'output');
+        addLine("📦 CVJ Package Manager (Termux-style):", 'output');
+        addLine("  cvj install <pkg> - Install packages", 'output');
+        addLine("  cvj update        - Update repositories", 'output');
+        addLine("  cvj search <term> - Search packages", 'output');
+        addLine("  cvj list          - List installed packages", 'output');
+        addLine("  cvj remove <pkg>  - Remove packages", 'output');
+        addLine("  cvj upgrade       - Upgrade all packages", 'output');
+        addLine("", 'output');
+        addLine("📦 Traditional Package Management:", 'output');
         addLine("  apt update        - Update package repositories", 'output');
         addLine("  apt install <pkg> - Install packages (nmap, metasploit, etc.)", 'output');
         addLine("  apt search <term> - Search available packages", 'output');
@@ -222,6 +230,114 @@ const TerminalWindow = () => {
           addLine(result, result.includes('✅') ? 'output' : 'error');
         } catch (error) {
           addLine(`❌ Error installing from URL: ${error}`, 'error');
+        }
+        break;
+
+      case 'cvj':
+        if (args.length === 0) {
+          addLine("CVJ Package Manager - Usage:", 'output');
+          addLine("  cvj install <package>   - Install package", 'output');
+          addLine("  cvj update             - Update repositories", 'output');
+          addLine("  cvj search <query>     - Search packages", 'output');
+          addLine("  cvj list               - List installed packages", 'output');
+          addLine("  cvj remove <package>   - Remove package", 'output');
+          addLine("  cvj upgrade            - Upgrade all packages", 'output');
+          break;
+        }
+
+        const subCommand = args[0];
+        const subArgs = args.slice(1);
+
+        switch (subCommand) {
+          case 'install':
+            if (subArgs.length === 0) {
+              addLine("Usage: cvj install <package>", 'error');
+              break;
+            }
+            try {
+              addLine(`📦 Installing ${subArgs[0]}...`, 'output');
+              const result = await NativePackageManager.installRealPackage(subArgs[0]);
+              addLine(result, result.includes('✅') ? 'output' : 'error');
+            } catch (error) {
+              addLine(`❌ Installation failed: ${error}`, 'error');
+            }
+            break;
+
+          case 'update':
+            try {
+              addLine("🔄 Updating package repositories...", 'output');
+              const result = await unixCommands.apt(['update']);
+              addLine(result.output || "✅ Repositories updated successfully", 'output');
+            } catch (error) {
+              addLine(`❌ Update failed: ${error}`, 'error');
+            }
+            break;
+
+          case 'search':
+            if (subArgs.length === 0) {
+              addLine("Usage: cvj search <query>", 'error');
+              break;
+            }
+            try {
+              const packages = await NativePackageManager.searchPackages(subArgs[0]);
+              if (packages.length === 0) {
+                addLine(`No packages found matching '${subArgs[0]}'`, 'output');
+              } else {
+                addLine(`📦 Found ${packages.length} packages:`, 'output');
+                packages.forEach(pkg => {
+                  const status = pkg.installed ? '✅ INSTALLED' : '📥 AVAILABLE';
+                  addLine(`  ${pkg.name} - ${pkg.description} [${status}]`, 'output');
+                });
+              }
+            } catch (error) {
+              addLine(`❌ Search failed: ${error}`, 'error');
+            }
+            break;
+
+          case 'list':
+            try {
+              const packages = await NativePackageManager.listInstalledTools();
+              if (packages.length === 0) {
+                addLine("📦 No packages installed", 'output');
+              } else {
+                addLine(`📦 Installed packages (${packages.length}):`, 'output');
+                packages.forEach(pkg => {
+                  addLine(`  ✅ ${pkg.name} v${pkg.version} - ${pkg.description}`, 'output');
+                });
+              }
+            } catch (error) {
+              addLine(`❌ Error listing packages: ${error}`, 'error');
+            }
+            break;
+
+          case 'remove':
+            if (subArgs.length === 0) {
+              addLine("Usage: cvj remove <package>", 'error');
+              break;
+            }
+            try {
+              addLine(`🗑️ Removing ${subArgs[0]}...`, 'output');
+              const result = await unixCommands.apt(['remove', subArgs[0]]);
+              addLine(result.output || `✅ ${subArgs[0]} removed successfully`, 'output');
+            } catch (error) {
+              addLine(`❌ Removal failed: ${error}`, 'error');
+            }
+            break;
+
+          case 'upgrade':
+            try {
+              addLine("⬆️ Upgrading all packages...", 'output');
+              const result = await unixCommands.apt(['upgrade']);
+              addLine(result.output || "✅ All packages upgraded successfully", 'output');
+            } catch (error) {
+              addLine(`❌ Upgrade failed: ${error}`, 'error');
+            }
+            break;
+
+          default:
+            addLine(`❌ Unknown cvj command: ${subCommand}`, 'error');
+            addLine("Use 'cvj' to see available commands", 'error');
+            break;
         }
         break;
 
