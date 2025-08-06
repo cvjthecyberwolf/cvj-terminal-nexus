@@ -48,11 +48,24 @@ export class RealPackageManager {
         name: 'cvj-security',
         url: 'https://security.cvj-os.org/kali',
         packages: [
-          { name: 'nikto', version: '2.5.0', description: 'Web server vulnerability scanner', dependencies: [], installed: false, size: 2097152 },
+          { name: 'nmap', version: '7.94', description: 'Network discovery and security auditing tool', dependencies: [], installed: false, size: 12582912 },
+          { name: 'nikto', version: '2.5.0', description: 'Web server vulnerability scanner', dependencies: [], installed: false, size: 8388608 },
+          { name: 'metasploit', version: '6.3.42', description: 'Penetration testing framework', dependencies: ['ruby', 'postgresql'], installed: false, size: 473741824 },
+          { name: 'burpsuite', version: '2023.10.3', description: 'Web application security testing platform', dependencies: ['java'], installed: false, size: 537919488 },
+          { name: 'wireshark', version: '4.2.0', description: 'Network protocol analyzer', dependencies: ['libpcap'], installed: false, size: 94371840 },
+          { name: 'aircrack-ng', version: '1.7', description: 'WiFi security auditing tools suite', dependencies: [], installed: false, size: 16252928 },
+          { name: 'hashcat', version: '6.2.6', description: 'Advanced password recovery utility', dependencies: ['opencl'], installed: false, size: 70778880 },
+          { name: 'sqlmap', version: '1.7.11', description: 'Automatic SQL injection and database takeover tool', dependencies: ['python3'], installed: false, size: 24117248 },
+          { name: 'hydra', version: '9.5', description: 'Very fast network logon cracker', dependencies: [], installed: false, size: 19660800 },
+          { name: 'dirb', version: '2.22', description: 'Web content scanner', dependencies: [], installed: false, size: 5570560 },
+          { name: 'gobuster', version: '3.6', description: 'Directory/file, DNS and VHost busting tool', dependencies: [], installed: false, size: 9437184 },
+          { name: 'john', version: '1.9.0', description: 'John the Ripper password cracker', dependencies: [], installed: false, size: 25165824 },
+          { name: 'masscan', version: '1.3.2', description: 'TCP port scanner', dependencies: [], installed: false, size: 13421772 },
+          { name: 'zap-proxy', version: '2.14.0', description: 'OWASP ZAP web application security scanner', dependencies: ['java'], installed: false, size: 164626432 },
           { name: 'maltego', version: '4.6.0', description: 'Link analysis and data mining platform', dependencies: ['java'], installed: false, size: 209715200 },
-          { name: 'zaproxy', version: '2.14.0', description: 'OWASP ZAP web application security scanner', dependencies: ['java'], installed: false, size: 104857600 },
           { name: 'beef-xss', version: '0.5.4.0', description: 'Browser Exploitation Framework', dependencies: ['ruby'], installed: false, size: 26214400 },
           { name: 'responder', version: '3.1.4.0', description: 'LLMNR, NBT-NS and MDNS poisoner', dependencies: ['python3'], installed: false, size: 1048576 },
+          { name: 'all-pentesting-tools', version: '1.0.0', description: 'Meta-package to install all penetration testing tools', dependencies: [], installed: false, size: 1258291200 }
         ]
       },
       {
@@ -110,6 +123,11 @@ export class RealPackageManager {
   }
 
   async installPackage(packageName: string): Promise<string> {
+    // Handle special "all-pentesting-tools" meta-package
+    if (packageName === 'all-pentesting-tools') {
+      return await this.installAllPenTestingTools();
+    }
+
     const pkg = this.findPackage(packageName);
     
     if (!pkg) {
@@ -144,7 +162,59 @@ export class RealPackageManager {
     pkg.installed = true;
     this.installedPackages.set(packageName, pkg);
     
+    // Mark security tool as installed if it's a security package
+    if (this.isSecurityTool(packageName)) {
+      const { securityTools } = await import('./securityTools');
+      securityTools.markToolAsInstalled(packageName);
+    }
+    
     return output;
+  }
+
+  private async installAllPenTestingTools(): Promise<string> {
+    const securityPackages = [
+      'nmap', 'nikto', 'metasploit', 'burpsuite', 'wireshark', 
+      'aircrack-ng', 'hashcat', 'sqlmap', 'hydra', 'dirb', 
+      'gobuster', 'john', 'masscan', 'zap-proxy'
+    ];
+
+    let output = '🔧 Installing all penetration testing tools...\n\n';
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const tool of securityPackages) {
+      try {
+        const result = await this.installPackage(tool);
+        if (result.includes('Done')) {
+          output += `✅ ${tool} - installed\n`;
+          successCount++;
+        } else {
+          output += `⚠️ ${tool} - ${result}\n`;
+          failCount++;
+        }
+      } catch (error) {
+        output += `❌ ${tool} - failed: ${error}\n`;
+        failCount++;
+      }
+    }
+
+    output += `\n📊 Installation Summary:\n`;
+    output += `✅ Successfully installed: ${successCount}\n`;
+    output += `❌ Failed: ${failCount}\n\n`;
+    output += `🚀 All available penetration testing tools are now ready!\n`;
+    output += `Use 'cvj scan --help' to see scanning options.\n`;
+    output += `Use 'cvj list' to see all installed tools.`;
+
+    return output;
+  }
+
+  private isSecurityTool(packageName: string): boolean {
+    const securityTools = [
+      'nmap', 'nikto', 'metasploit', 'burpsuite', 'wireshark', 
+      'aircrack-ng', 'hashcat', 'sqlmap', 'hydra', 'dirb', 
+      'gobuster', 'john', 'masscan', 'zap-proxy'
+    ];
+    return securityTools.includes(packageName);
   }
 
   async removePackage(packageName: string): Promise<string> {

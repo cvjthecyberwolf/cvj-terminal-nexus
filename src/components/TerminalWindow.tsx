@@ -325,13 +325,21 @@ const TerminalWindow = () => {
         switch (subCommand) {
           case 'install':
             if (subArgs.length === 0) {
-              addLine("Usage: cvj install <package>", 'error');
+              addLine("Usage: cvj install <package>", 'output');
+              addLine("", 'output');
+              addLine("Quick installs:", 'output');
+              addLine("  cvj install all-pentesting-tools  # Install all penetration testing tools", 'output');
+              addLine("  cvj install nmap                   # Install specific tool", 'output');
+              addLine("", 'output');
+              addLine("Or use git to clone and install:", 'output');
+              addLine("  git clone https://github.com/nmap/nmap", 'output');
+              addLine("  git clone https://github.com/rapid7/metasploit-framework", 'output');
               break;
             }
             try {
               addLine(`📦 Installing ${subArgs[0]}...`, 'output');
-              const result = await NativePackageManager.installRealPackage(subArgs[0]);
-              addLine(result, result.includes('✅') ? 'output' : 'error');
+              const result = await packageManager.installPackage(subArgs[0]);
+              addLine(result, result.includes('✅') || result.includes('Done') ? 'output' : 'error');
             } catch (error) {
               addLine(`❌ Installation failed: ${error}`, 'error');
             }

@@ -275,6 +275,21 @@ Swap:        2097152           0     2097152`;
       const url = args[0];
       const targetDir = args[1] || url.split('/').pop()?.replace('.git', '') || 'repo';
       
+      // Check if directory already exists
+      if (await fileSystem.exists(targetDir)) {
+        return { output: '', error: `git clone: destination path '${targetDir}' already exists`, exitCode: 1 };
+      }
+
+      // Handle popular penetration testing tool repositories
+      const penTestConfig = this.getPenTestRepoConfig(url, targetDir);
+      if (penTestConfig) {
+        await this.installPenTestTool(penTestConfig);
+        return { 
+          output: `Cloning into '${targetDir}'...\n${penTestConfig.name} installed successfully!\nUse 'cvj scan ${penTestConfig.tool}' to run scans.`, 
+          exitCode: 0 
+        };
+      }
+      
       // For demonstration, create a mock git repository structure
       await fileSystem.createDirectory(targetDir);
       await fileSystem.createDirectory(`${targetDir}/.git`);
@@ -284,6 +299,100 @@ Swap:        2097152           0     2097152`;
     } catch (error) {
       return { output: '', error: `git clone: ${error instanceof Error ? error.message : 'Unknown error'}`, exitCode: 1 };
     }
+  }
+
+  private getPenTestRepoConfig(url: string, targetDir: string) {
+    const repoConfigs = {
+      'nmap': {
+        urls: ['https://github.com/nmap/nmap', 'https://github.com/nmap/nmap.git'],
+        name: 'Nmap Network Scanner',
+        tool: 'nmap',
+        files: ['nmap', 'nse_main.lua', 'docs/nmap.1']
+      },
+      'metasploit-framework': {
+        urls: ['https://github.com/rapid7/metasploit-framework', 'https://github.com/rapid7/metasploit-framework.git'],
+        name: 'Metasploit Framework',
+        tool: 'metasploit',
+        files: ['msfconsole', 'lib/msf/core.rb', 'modules/exploits/', 'modules/payloads/']
+      },
+      'sqlmap': {
+        urls: ['https://github.com/sqlmapproject/sqlmap', 'https://github.com/sqlmapproject/sqlmap.git'],
+        name: 'SQLMap SQL Injection Tool',
+        tool: 'sqlmap',
+        files: ['sqlmap.py', 'lib/core/common.py', 'txt/user-agents.txt']
+      },
+      'nikto': {
+        urls: ['https://github.com/sullo/nikto', 'https://github.com/sullo/nikto.git'],
+        name: 'Nikto Web Scanner',
+        tool: 'nikto',
+        files: ['program/nikto.pl', 'program/databases/', 'program/plugins/']
+      },
+      'aircrack-ng': {
+        urls: ['https://github.com/aircrack-ng/aircrack-ng', 'https://github.com/aircrack-ng/aircrack-ng.git'],
+        name: 'Aircrack-ng WiFi Security Suite',
+        tool: 'aircrack-ng',
+        files: ['src/aircrack-ng.c', 'src/airodump-ng.c', 'manpages/']
+      },
+      'hashcat': {
+        urls: ['https://github.com/hashcat/hashcat', 'https://github.com/hashcat/hashcat.git'],
+        name: 'Hashcat Password Recovery',
+        tool: 'hashcat',
+        files: ['src/hashcat.c', 'OpenCL/', 'rules/', 'masks/']
+      },
+      'burpsuite': {
+        urls: ['https://github.com/PortSwigger/burp-extender-api', 'https://github.com/PortSwigger/burp-extender-api.git'],
+        name: 'Burp Suite Extensions API',
+        tool: 'burpsuite',
+        files: ['burp/', 'examples/', 'javadoc/']
+      },
+      'wireshark': {
+        urls: ['https://github.com/wireshark/wireshark', 'https://github.com/wireshark/wireshark.git'],
+        name: 'Wireshark Network Analyzer',
+        tool: 'wireshark',
+        files: ['wireshark', 'epan/', 'ui/', 'capture/']
+      }
+    };
+
+    for (const [toolName, config] of Object.entries(repoConfigs)) {
+      if (config.urls.some(repoUrl => url.includes(repoUrl.replace('https://github.com/', '').replace('.git', ''))) || 
+          targetDir.toLowerCase().includes(toolName.toLowerCase())) {
+        return { ...config, targetDir };
+      }
+    }
+    return null;
+  }
+
+  private async installPenTestTool(config: any) {
+    const { targetDir, files, tool } = config;
+    
+    // Create directory structure for the tool
+    await fileSystem.createDirectory(targetDir);
+    await fileSystem.createDirectory(`${targetDir}/.git`);
+    
+    // Create realistic file structure for the tool
+    for (const file of files) {
+      if (file.endsWith('/')) {
+        await fileSystem.createDirectory(`${targetDir}/${file}`);
+        // Add some sample files in directories
+        if (file.includes('modules') || file.includes('plugins') || file.includes('rules')) {
+          await fileSystem.writeTextFile(`${targetDir}/${file}sample.txt`, `Sample ${tool} module/plugin`);
+        }
+      } else {
+        const dir = file.includes('/') ? `${targetDir}/${file.substring(0, file.lastIndexOf('/'))}` : targetDir;
+        if (file.includes('/')) {
+          await fileSystem.createDirectory(dir);
+        }
+        await fileSystem.writeTextFile(`${targetDir}/${file}`, `#!/bin/bash\n# ${tool} - ${file}\necho "Running ${tool}..."`);
+      }
+    }
+
+    // Create installation script
+    await fileSystem.writeTextFile(`${targetDir}/install.sh`, 
+      `#!/bin/bash\necho "Installing ${config.name}..."\necho "Installation completed!"\necho "Use 'cvj scan ${tool}' to run scans."`);
+
+    // Mark tool as installed in security tools
+    const { securityTools } = await import('./securityTools');
+    securityTools.markToolAsInstalled(tool);
   }
 
   // Environment variable management
