@@ -26,11 +26,11 @@ export class RealPackageManager {
   }
 
   private initializeRepositories(): void {
-    // Kali Linux repositories
+    // CVJ Terminal OS Mirror Repositories
     this.repositories = [
       {
-        name: 'kali-main',
-        url: 'http://http.kali.org/kali',
+        name: 'cvj-main',
+        url: 'https://mirrors.cvj-os.org/main',
         packages: [
           { name: 'nmap', version: '7.94', description: 'Network exploration tool and security scanner', dependencies: [], installed: false, size: 2048000 },
           { name: 'metasploit-framework', version: '6.3.57', description: 'Advanced penetration testing platform', dependencies: ['ruby', 'postgresql'], installed: false, size: 104857600 },
@@ -45,14 +45,42 @@ export class RealPackageManager {
         ]
       },
       {
-        name: 'ubuntu-main',
-        url: 'http://archive.ubuntu.com/ubuntu',
+        name: 'cvj-security',
+        url: 'https://security.cvj-os.org/kali',
+        packages: [
+          { name: 'nikto', version: '2.5.0', description: 'Web server vulnerability scanner', dependencies: [], installed: false, size: 2097152 },
+          { name: 'maltego', version: '4.6.0', description: 'Link analysis and data mining platform', dependencies: ['java'], installed: false, size: 209715200 },
+          { name: 'zaproxy', version: '2.14.0', description: 'OWASP ZAP web application security scanner', dependencies: ['java'], installed: false, size: 104857600 },
+          { name: 'beef-xss', version: '0.5.4.0', description: 'Browser Exploitation Framework', dependencies: ['ruby'], installed: false, size: 26214400 },
+          { name: 'responder', version: '3.1.4.0', description: 'LLMNR, NBT-NS and MDNS poisoner', dependencies: ['python3'], installed: false, size: 1048576 },
+        ]
+      },
+      {
+        name: 'cvj-utils',
+        url: 'https://utils.cvj-os.org/main',
         packages: [
           { name: 'firefox', version: '122.0', description: 'Mozilla Firefox web browser', dependencies: [], installed: false, size: 73400320 },
           { name: 'libreoffice', version: '7.6.4', description: 'Office productivity suite', dependencies: [], installed: false, size: 314572800 },
           { name: 'gimp', version: '2.10.36', description: 'GNU Image Manipulation Program', dependencies: [], installed: false, size: 41943040 },
           { name: 'vlc', version: '3.0.20', description: 'VLC media player', dependencies: [], installed: false, size: 20971520 },
           { name: 'git', version: '2.43.0', description: 'Distributed version control system', dependencies: [], installed: false, size: 10485760 },
+          { name: 'curl', version: '8.6.0', description: 'Command line tool for transferring data', dependencies: [], installed: false, size: 1572864 },
+          { name: 'wget', version: '1.21.4', description: 'Network downloader', dependencies: [], installed: false, size: 2097152 },
+          { name: 'htop', version: '3.3.0', description: 'Interactive process viewer', dependencies: [], installed: false, size: 524288 },
+          { name: 'tmux', version: '3.4', description: 'Terminal multiplexer', dependencies: [], installed: false, size: 1048576 },
+        ]
+      },
+      {
+        name: 'cvj-dev',
+        url: 'https://dev.cvj-os.org/packages',
+        packages: [
+          { name: 'python3', version: '3.12.2', description: 'Python 3 programming language', dependencies: [], installed: false, size: 52428800 },
+          { name: 'nodejs', version: '20.11.1', description: 'JavaScript runtime built on Chrome V8', dependencies: [], installed: false, size: 31457280 },
+          { name: 'gcc', version: '13.2.0', description: 'GNU Compiler Collection', dependencies: [], installed: false, size: 104857600 },
+          { name: 'make', version: '4.4.1', description: 'Build automation tool', dependencies: [], installed: false, size: 1048576 },
+          { name: 'cmake', version: '3.28.3', description: 'Cross-platform build system', dependencies: [], installed: false, size: 10485760 },
+          { name: 'vim', version: '9.1', description: 'Vi IMproved text editor', dependencies: [], installed: false, size: 3145728 },
+          { name: 'nano', version: '7.2', description: 'Simple text editor', dependencies: [], installed: false, size: 524288 },
         ]
       }
     ];
