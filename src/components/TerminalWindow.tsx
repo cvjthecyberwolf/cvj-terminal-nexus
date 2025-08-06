@@ -3,6 +3,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { fileSystem } from "@/lib/fileSystem";
 import { unixCommands, CommandResult } from "@/lib/unixCommands";
 import { packageManager } from "@/lib/packageManager";
+import { securityTools } from "@/lib/securityTools";
+import { botManager } from "@/lib/botManager";
 import { NativePackageManager } from "@/lib/nativePackageManager";
 import { AndroidShell } from "@/lib/nativeShell";
 import { Capacitor } from "@capacitor/core";
@@ -156,6 +158,23 @@ const TerminalWindow = () => {
         addLine("  uname -a          - Show system details", 'output');
         addLine("  whoami            - Current user", 'output');
         addLine("  ps, free, df, env - System monitoring", 'output');
+        addLine("", 'output');
+        addLine("🔒 Security Tools (Production Ready):", 'output');
+        addLine("  security list     - List available security tools", 'output');
+        addLine("  security info <tool> - Get tool information", 'output');
+        addLine("  security scan <tool> <target> [options] - Run security scan", 'output');
+        addLine("  security history  - View scan history", 'output');
+        addLine("  security report   - Generate security report", 'output');
+        addLine("", 'output');
+        addLine("🤖 Bot Manager (Automation System):", 'output');
+        addLine("  bot list          - List all bots", 'output');
+        addLine("  bot create <name> <template> - Create new bot", 'output');
+        addLine("  bot start <id>    - Start bot execution", 'output');
+        addLine("  bot stop <id>     - Stop bot execution", 'output');
+        addLine("  bot delete <id>   - Delete bot", 'output');
+        addLine("  bot status        - Show bot manager status", 'output');
+        addLine("  bot templates     - List available bot templates", 'output');
+        addLine("  bot logs <id>     - View bot logs", 'output');
         addLine("", 'output');
         addLine("🧹 Utility Commands:", 'output');
         addLine("  clear             - Clear terminal", 'output');
@@ -447,13 +466,19 @@ const TerminalWindow = () => {
             
             switch (repoCommand) {
               case 'list':
-                addLine("📚 Configured repositories:", 'output');
+                addLine("📚 CVJ Terminal OS Configured Repositories:", 'output');
                 addLine("", 'output');
-                addLine("1. kali-main - http://http.kali.org/kali", 'output');
-                addLine("   Security tools and penetration testing packages", 'output');
+                addLine("1. cvj-main - https://mirrors.cvj-os.org/main", 'output');
+                addLine("   Core security and penetration testing tools", 'output');
                 addLine("", 'output');
-                addLine("2. ubuntu-main - http://archive.ubuntu.com/ubuntu", 'output');
-                addLine("   Standard Ubuntu packages and applications", 'output');
+                addLine("2. cvj-security - https://security.cvj-os.org/kali", 'output');
+                addLine("   Advanced security and vulnerability assessment tools", 'output');
+                addLine("", 'output');
+                addLine("3. cvj-utils - https://utils.cvj-os.org/main", 'output');
+                addLine("   Essential utilities and development tools", 'output');
+                addLine("", 'output');
+                addLine("4. cvj-dev - https://dev.cvj-os.org/packages", 'output');
+                addLine("   Development environments and programming languages", 'output');
                 break;
                 
               case 'add':
@@ -486,6 +511,264 @@ const TerminalWindow = () => {
           default:
             addLine(`❌ Unknown cvj command: ${subCommand}`, 'error');
             addLine("Use 'cvj' to see available commands", 'error');
+            break;
+        }
+        break;
+
+      case 'security':
+        if (args.length === 0) {
+          addLine("CVJ Security Tools Manager", 'output');
+          addLine("Usage: security [list|info|scan|history|report]", 'error');
+          break;
+        }
+
+        const securityCommand = args[0];
+        const securityArgs = args.slice(1);
+
+        switch (securityCommand) {
+          case 'list':
+            try {
+              const category = securityArgs[0];
+              const tools = await securityTools.listTools(category);
+              if (tools.length === 0) {
+                addLine("No security tools found", 'output');
+              } else {
+                addLine(`🔒 Security Tools ${category ? `(${category})` : ''}:`, 'output');
+                addLine("", 'output');
+                tools.forEach(tool => {
+                  const status = tool.installed ? '✅ INSTALLED' : '❌ NOT INSTALLED';
+                  addLine(`📊 ${tool.name} - ${tool.category}`, 'output');
+                  addLine(`   ${tool.description}`, 'output');
+                  addLine(`   Status: ${status}`, 'output');
+                  addLine("", 'output');
+                });
+              }
+            } catch (error) {
+              addLine(`❌ Error listing tools: ${error}`, 'error');
+            }
+            break;
+
+          case 'info':
+            if (securityArgs.length === 0) {
+              addLine("Usage: security info <tool-name>", 'error');
+              break;
+            }
+            try {
+              const tool = await securityTools.getToolInfo(securityArgs[0]);
+              if (!tool) {
+                addLine(`❌ Security tool '${securityArgs[0]}' not found`, 'error');
+              } else {
+                addLine(`🔒 Security Tool Information:`, 'output');
+                addLine(`Name: ${tool.name}`, 'output');
+                addLine(`Category: ${tool.category}`, 'output');
+                addLine(`Description: ${tool.description}`, 'output');
+                addLine(`Command: ${tool.command}`, 'output');
+                addLine(`Status: ${tool.installed ? 'Installed' : 'Not Installed'}`, 'output');
+                addLine(`Available Options: ${tool.options.join(', ')}`, 'output');
+              }
+            } catch (error) {
+              addLine(`❌ Error getting tool info: ${error}`, 'error');
+            }
+            break;
+
+          case 'scan':
+            if (securityArgs.length < 2) {
+              addLine("Usage: security scan <tool> <target> [options]", 'error');
+              addLine("Example: security scan nmap 192.168.1.1 -sS -p 22,80,443", 'error');
+              break;
+            }
+            try {
+              const toolName = securityArgs[0];
+              const target = securityArgs[1];
+              const options = securityArgs.slice(2);
+              
+              addLine(`🔍 Running security scan with ${toolName}...`, 'output');
+              const result = await securityTools.runScan(toolName, target, options);
+              addLine(result, 'output');
+              
+              // Mark tool as installed when it's used
+              securityTools.markToolAsInstalled(toolName);
+            } catch (error) {
+              addLine(`❌ Scan failed: ${error}`, 'error');
+            }
+            break;
+
+          case 'history':
+            try {
+              const history = await securityTools.getScanHistory();
+              if (history.length === 0) {
+                addLine("📋 No scan history available", 'output');
+              } else {
+                addLine(`📋 Security Scan History (${history.length} scans):`, 'output');
+                addLine("", 'output');
+                history.forEach((scan, index) => {
+                  addLine(`${index + 1}. Target: ${scan.target}`, 'output');
+                  addLine(`   Time: ${new Date(scan.timestamp).toLocaleString()}`, 'output');
+                  addLine(`   Severity: ${scan.severity.toUpperCase()}`, 'output');
+                  addLine(`   Findings: ${scan.findings.length}`, 'output');
+                  addLine("", 'output');
+                });
+              }
+            } catch (error) {
+              addLine(`❌ Error retrieving history: ${error}`, 'error');
+            }
+            break;
+
+          case 'report':
+            try {
+              const format = securityArgs[0] || 'text';
+              addLine("📊 Generating security report...", 'output');
+              const report = await securityTools.generateReport(format as 'text' | 'json');
+              addLine(report, 'output');
+            } catch (error) {
+              addLine(`❌ Error generating report: ${error}`, 'error');
+            }
+            break;
+
+          default:
+            addLine(`❌ Unknown security command: ${securityCommand}`, 'error');
+            addLine("Use 'security list', 'security info <tool>', 'security scan <tool> <target>', 'security history', or 'security report'", 'error');
+            break;
+        }
+        break;
+
+      case 'bot':
+        if (args.length === 0) {
+          addLine("CVJ Bot Manager - Automation System", 'output');
+          addLine("Usage: bot [list|create|start|stop|delete|status|templates|logs]", 'error');
+          break;
+        }
+
+        const botCommand = args[0];
+        const botArgs = args.slice(1);
+
+        switch (botCommand) {
+          case 'list':
+            try {
+              const bots = await botManager.listBots();
+              if (bots.length === 0) {
+                addLine("🤖 No bots created yet", 'output');
+                addLine("Use 'bot templates' to see available bot templates", 'output');
+              } else {
+                addLine(`🤖 Automation Bots (${bots.length}):`, 'output');
+                addLine("", 'output');
+                bots.forEach(bot => {
+                  const statusIcon = bot.status === 'running' ? '🟢' : 
+                                   bot.status === 'error' ? '🔴' : 
+                                   bot.status === 'stopped' ? '🟡' : '⚪';
+                  addLine(`${statusIcon} ${bot.name} (${bot.id})`, 'output');
+                  addLine(`   Type: ${bot.type}`, 'output');
+                  addLine(`   Status: ${bot.status}`, 'output');
+                  addLine(`   Description: ${bot.description}`, 'output');
+                  addLine("", 'output');
+                });
+              }
+            } catch (error) {
+              addLine(`❌ Error listing bots: ${error}`, 'error');
+            }
+            break;
+
+          case 'create':
+            if (botArgs.length < 2) {
+              addLine("Usage: bot create <name> <template>", 'error');
+              addLine("Use 'bot templates' to see available templates", 'error');
+              break;
+            }
+            try {
+              const botName = botArgs[0];
+              const template = botArgs.slice(1).join(' ');
+              addLine(`🤖 Creating bot '${botName}' from template '${template}'...`, 'output');
+              const result = await botManager.createBot(botName, template);
+              addLine(result, 'output');
+            } catch (error) {
+              addLine(`❌ Bot creation failed: ${error}`, 'error');
+            }
+            break;
+
+          case 'start':
+            if (botArgs.length === 0) {
+              addLine("Usage: bot start <bot-id>", 'error');
+              break;
+            }
+            try {
+              addLine(`🤖 Starting bot ${botArgs[0]}...`, 'output');
+              const result = await botManager.startBot(botArgs[0]);
+              addLine(result, 'output');
+            } catch (error) {
+              addLine(`❌ Failed to start bot: ${error}`, 'error');
+            }
+            break;
+
+          case 'stop':
+            if (botArgs.length === 0) {
+              addLine("Usage: bot stop <bot-id>", 'error');
+              break;
+            }
+            try {
+              addLine(`🤖 Stopping bot ${botArgs[0]}...`, 'output');
+              const result = await botManager.stopBot(botArgs[0]);
+              addLine(result, 'output');
+            } catch (error) {
+              addLine(`❌ Failed to stop bot: ${error}`, 'error');
+            }
+            break;
+
+          case 'delete':
+            if (botArgs.length === 0) {
+              addLine("Usage: bot delete <bot-id>", 'error');
+              break;
+            }
+            try {
+              addLine(`🤖 Deleting bot ${botArgs[0]}...`, 'output');
+              const result = await botManager.deleteBot(botArgs[0]);
+              addLine(result, 'output');
+            } catch (error) {
+              addLine(`❌ Failed to delete bot: ${error}`, 'error');
+            }
+            break;
+
+          case 'status':
+            try {
+              const status = await botManager.getBotStatus();
+              addLine(status, 'output');
+            } catch (error) {
+              addLine(`❌ Error getting bot status: ${error}`, 'error');
+            }
+            break;
+
+          case 'templates':
+            try {
+              const templates = await botManager.listTemplates();
+              addLine("🤖 Available Bot Templates:", 'output');
+              addLine("", 'output');
+              templates.forEach(template => {
+                addLine(`📋 ${template.name}`, 'output');
+                addLine(`   Type: ${template.type}`, 'output');
+                addLine(`   Description: ${template.description}`, 'output');
+                addLine(`   Commands: ${template.commands.length}`, 'output');
+                addLine("", 'output');
+              });
+            } catch (error) {
+              addLine(`❌ Error listing templates: ${error}`, 'error');
+            }
+            break;
+
+          case 'logs':
+            if (botArgs.length === 0) {
+              addLine("Usage: bot logs <bot-id>", 'error');
+              break;
+            }
+            try {
+              const logs = await botManager.getBotLogs(botArgs[0]);
+              addLine(logs, 'output');
+            } catch (error) {
+              addLine(`❌ Error getting bot logs: ${error}`, 'error');
+            }
+            break;
+
+          default:
+            addLine(`❌ Unknown bot command: ${botCommand}`, 'error');
+            addLine("Available commands: list, create, start, stop, delete, status, templates, logs", 'error');
             break;
         }
         break;
