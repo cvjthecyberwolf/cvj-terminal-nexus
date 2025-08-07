@@ -2,6 +2,7 @@ import TerminalWindow from "@/components/TerminalWindow";
 import { FeatureCard } from "@/components/FeatureCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import { 
   Terminal, 
   Shield, 
@@ -12,7 +13,8 @@ import {
   Download,
   Smartphone,
   Server,
-  GitBranch
+  GitBranch,
+  Monitor
 } from "lucide-react";
 
 const Index = () => {
@@ -93,6 +95,13 @@ const Index = () => {
                 <GitBranch className="w-5 h-5 mr-2" />
                 View on GitHub
               </Button>
+              
+              <Link to="/desktop">
+                <Button variant="secondary" size="lg" className="hover-scale">
+                  <Monitor className="w-5 h-5 mr-2" />
+                  Launch CVJ Desktop
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
