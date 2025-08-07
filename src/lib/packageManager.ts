@@ -65,7 +65,31 @@ export class RealPackageManager {
           { name: 'maltego', version: '4.6.0', description: 'Link analysis and data mining platform', dependencies: ['java'], installed: false, size: 209715200 },
           { name: 'beef-xss', version: '0.5.4.0', description: 'Browser Exploitation Framework', dependencies: ['ruby'], installed: false, size: 26214400 },
           { name: 'responder', version: '3.1.4.0', description: 'LLMNR, NBT-NS and MDNS poisoner', dependencies: ['python3'], installed: false, size: 1048576 },
-          { name: 'all-pentesting-tools', version: '1.0.0', description: 'Meta-package to install all penetration testing tools', dependencies: [], installed: false, size: 1258291200 }
+          { name: 'whois', version: '5.5.17', description: 'Client for the whois directory service', dependencies: [], installed: false, size: 1048576 },
+          { name: 'recon-ng', version: '5.1.2', description: 'Web reconnaissance framework', dependencies: ['python3'], installed: false, size: 15728640 },
+          { name: 'enum4linux', version: '0.9.1', description: 'Tool for enumerating data from Windows and Samba hosts', dependencies: [], installed: false, size: 1572864 },
+          { name: 'smbclient', version: '4.19.4', description: 'SMB/CIFS client for Unix systems', dependencies: [], installed: false, size: 5242880 },
+          { name: 'netcat', version: '1.10', description: 'Network swiss army knife', dependencies: [], installed: false, size: 524288 },
+          { name: 'dnsrecon', version: '1.1.4', description: 'DNS enumeration script', dependencies: ['python3'], installed: false, size: 2097152 },
+          { name: 'fierce', version: '1.5.0', description: 'Domain scanner', dependencies: ['python3'], installed: false, size: 1048576 },
+          { name: 'theharvester', version: '4.5.1', description: 'E-mails, subdomains and names harvester', dependencies: ['python3'], installed: false, size: 10485760 },
+          { name: 'sublist3r', version: '1.0', description: 'Subdomain enumeration tool', dependencies: ['python3'], installed: false, size: 3145728 },
+          { name: 'amass', version: '4.2.0', description: 'In-depth attack surface mapping', dependencies: [], installed: false, size: 52428800 },
+          { name: 'ffuf', version: '2.1.0', description: 'Fast web fuzzer written in Go', dependencies: [], installed: false, size: 8388608 },
+          { name: 'wfuzz', version: '3.1.0', description: 'Web application fuzzer', dependencies: ['python3'], installed: false, size: 4194304 },
+          { name: 'nuclei', version: '3.1.0', description: 'Fast and customizable vulnerability scanner', dependencies: [], installed: false, size: 31457280 },
+          { name: 'searchsploit', version: '4.50.3', description: 'Command line search tool for Exploit-DB', dependencies: [], installed: false, size: 157286400 },
+          { name: 'crackmapexec', version: '5.4.0', description: 'Network service exploitation tool', dependencies: ['python3'], installed: false, size: 20971520 },
+          { name: 'impacket', version: '0.11.0', description: 'Collection of Python classes for working with network protocols', dependencies: ['python3'], installed: false, size: 15728640 },
+          { name: 'bloodhound', version: '4.3.1', description: 'Active Directory attack path analysis', dependencies: [], installed: false, size: 104857600 },
+          { name: 'dirsearch', version: '0.4.3', description: 'Web path scanner', dependencies: ['python3'], installed: false, size: 5242880 },
+          { name: 'feroxbuster', version: '2.10.1', description: 'Fast, simple, recursive content discovery tool', dependencies: [], installed: false, size: 12582912 },
+          { name: 'whatweb', version: '0.5.5', description: 'Web technology identifier', dependencies: ['ruby'], installed: false, size: 8388608 },
+          { name: 'wafw00f', version: '2.2.0', description: 'Web Application Firewall detection tool', dependencies: ['python3'], installed: false, size: 2097152 },
+          { name: 'lynis', version: '3.0.9', description: 'Security auditing tool for Unix-based systems', dependencies: [], installed: false, size: 10485760 },
+          { name: 'chkrootkit', version: '0.57', description: 'Rootkit detection tool', dependencies: [], installed: false, size: 3145728 },
+          { name: 'rkhunter', version: '1.4.6', description: 'Rootkit hunter', dependencies: [], installed: false, size: 5242880 },
+          { name: 'all-pentesting-tools', version: '1.0.0', description: 'Meta-package to install all penetration testing tools', dependencies: [], installed: false, size: 2147483648 }
         ]
       },
       {
@@ -175,7 +199,12 @@ export class RealPackageManager {
     const securityPackages = [
       'nmap', 'nikto', 'metasploit', 'burpsuite', 'wireshark', 
       'aircrack-ng', 'hashcat', 'sqlmap', 'hydra', 'dirb', 
-      'gobuster', 'john', 'masscan', 'zap-proxy'
+      'gobuster', 'john', 'masscan', 'zap-proxy', 'whois',
+      'recon-ng', 'enum4linux', 'smbclient', 'netcat', 'dnsrecon',
+      'fierce', 'theharvester', 'sublist3r', 'amass', 'ffuf',
+      'wfuzz', 'nuclei', 'searchsploit', 'crackmapexec', 'impacket',
+      'bloodhound', 'dirsearch', 'feroxbuster', 'whatweb', 'wafw00f',
+      'lynis', 'chkrootkit', 'rkhunter'
     ];
 
     let output = '🔧 Installing all penetration testing tools...\n\n';
@@ -212,7 +241,12 @@ export class RealPackageManager {
     const securityTools = [
       'nmap', 'nikto', 'metasploit', 'burpsuite', 'wireshark', 
       'aircrack-ng', 'hashcat', 'sqlmap', 'hydra', 'dirb', 
-      'gobuster', 'john', 'masscan', 'zap-proxy'
+      'gobuster', 'john', 'masscan', 'zap-proxy', 'whois',
+      'recon-ng', 'enum4linux', 'smbclient', 'netcat', 'dnsrecon',
+      'fierce', 'theharvester', 'sublist3r', 'amass', 'ffuf',
+      'wfuzz', 'nuclei', 'searchsploit', 'crackmapexec', 'impacket',
+      'bloodhound', 'dirsearch', 'feroxbuster', 'whatweb', 'wafw00f',
+      'lynis', 'chkrootkit', 'rkhunter'
     ];
     return securityTools.includes(packageName);
   }
