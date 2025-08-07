@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Monitor, Terminal, Home } from "lucide-react";
+import { Monitor, Terminal, Home, Shield, Network, Cpu, Bot } from "lucide-react";
 import wallpaper from "@/assets/wallpapers/alpha-wolf-cyber-room.jpg";
-
+import TerminalWindow from "@/components/TerminalWindow";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 const setSEO = () => {
   document.title = "CVJ Desktop GUI - Cyber Wolf Terminal";
 
@@ -99,6 +100,8 @@ const Desktop = () => {
   useEffect(() => {
     setSEO();
   }, []);
+  const [terminalOpen, setTerminalOpen] = useState(false);
+  const [appModal, setAppModal] = useState<null | { title: string }>(null);
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden bg-background">
@@ -117,9 +120,9 @@ const Desktop = () => {
             <Link to="/" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-border hover:bg-primary/10 transition-colors">
               <Home className="w-4 h-4" /> Home
             </Link>
-            <a href="#" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-border hover:bg-primary/10 transition-colors">
+            <button type="button" onClick={() => setTerminalOpen(true)} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-border hover:bg-primary/10 transition-colors">
               <Terminal className="w-4 h-4" /> Open Terminal
-            </a>
+            </button>
           </nav>
         </div>
       </header>
@@ -142,6 +145,51 @@ const Desktop = () => {
           </div>
         </div>
       </main>
+
+      {/* App Dock */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-20 bg-background/60 border border-border backdrop-blur rounded-xl px-3 py-2 shadow-[var(--shadow-elegant)]">
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => setTerminalOpen(true)} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Terminal">
+            <Terminal className="w-4 h-4" /> <span className="hidden sm:inline">Terminal</span>
+          </button>
+          <button type="button" onClick={() => setAppModal({ title: 'Package Manager' })} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Package Manager">
+            <Cpu className="w-4 h-4" /> <span className="hidden sm:inline">Packages</span>
+          </button>
+          <button type="button" onClick={() => setAppModal({ title: 'Network Tools' })} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Network Tools">
+            <Network className="w-4 h-4" /> <span className="hidden sm:inline">Network</span>
+          </button>
+          <button type="button" onClick={() => setAppModal({ title: 'Security Tools' })} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Security Tools">
+            <Shield className="w-4 h-4" /> <span className="hidden sm:inline">Security</span>
+          </button>
+          <button type="button" onClick={() => setAppModal({ title: 'Bot Manager' })} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Bot Manager">
+            <Bot className="w-4 h-4" /> <span className="hidden sm:inline">Bots</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Terminal Dialog */}
+      <Dialog open={terminalOpen} onOpenChange={setTerminalOpen}>
+        <DialogContent className="max-w-4xl w-[95vw]">
+          <DialogHeader>
+            <DialogTitle className="font-cyber text-primary">Terminal</DialogTitle>
+          </DialogHeader>
+          <div className="h-[60vh] md:h-[70vh] overflow-hidden border border-border rounded-md bg-card">
+            <TerminalWindow />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* App Placeholder Dialog */}
+      <Dialog open={!!appModal} onOpenChange={(open) => { if (!open) setAppModal(null); }}>
+        <DialogContent className="max-w-2xl w-[90vw]">
+          <DialogHeader>
+            <DialogTitle className="font-cyber">{appModal?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="text-sm text-muted-foreground">
+            {appModal?.title} GUI is coming soon. You can use the Terminal for now to access these features.
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <footer className="relative z-10 py-6 text-center text-xs text-muted-foreground">
         © 2025 CVJ Technologies • CVJ Desktop GUI
