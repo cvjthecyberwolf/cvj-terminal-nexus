@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Monitor, Terminal, Home, Shield, Network, Cpu, Bot } from "lucide-react";
+import { Monitor, Terminal, Home, Shield, Network, Cpu, Bot, Globe, Youtube } from "lucide-react";
 import wallpaper from "@/assets/wallpapers/alpha-wolf-cyber-room.jpg";
 import TerminalWindow from "@/components/TerminalWindow";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -102,6 +102,29 @@ const Desktop = () => {
   }, []);
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [appModal, setAppModal] = useState<null | { title: string }>(null);
+  const [showIntro, setShowIntro] = useState(true);
+  const [typedTitle, setTypedTitle] = useState("");
+  const [typedSubtitle, setTypedSubtitle] = useState("");
+
+  useEffect(() => {
+    const titleFull = "CVJ The Cyber Wolf";
+    const subtitleFull = "\"You'reThe Next Cyber Alpha Dominate\"";
+    let ti = 0;
+    let si = 0;
+    const tId = window.setInterval(() => {
+      if (ti < titleFull.length) {
+        setTypedTitle(titleFull.slice(0, ++ti));
+      } else {
+        if (si < subtitleFull.length) {
+          setTypedSubtitle(subtitleFull.slice(0, ++si));
+        } else {
+          window.clearInterval(tId);
+          setTimeout(() => setShowIntro(false), 900);
+        }
+      }
+    }, 50);
+    return () => window.clearInterval(tId);
+  }, []);
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden bg-background">
@@ -112,6 +135,59 @@ const Desktop = () => {
         className="absolute inset-0 w-full h-full object-cover"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/40 to-background/70" />
+
+      {/* Branding overlay */}
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 z-10 text-center animate-fade-in">
+        <h2 className="font-cyber text-2xl md:text-3xl text-primary drop-shadow">CVJ The Cyber Wolf</h2>
+        <p className="mt-1 text-sm md:text-base text-muted-foreground">"You'reThe Next Cyber Alpha Dominate"</p>
+      </div>
+
+      {/* Desktop icons (shortcuts) */}
+      <div className="absolute left-4 bottom-24 z-10 flex flex-col gap-3">
+        <a
+          href="https://www.mozilla.org/firefox/new/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group inline-flex flex-col items-center gap-1 px-2 py-2 rounded-md bg-background/40 border border-border hover:bg-primary/10 transition-colors"
+          aria-label="Open Firefox"
+        >
+          <Globe className="w-6 h-6 text-primary" />
+          <span className="text-xs text-muted-foreground group-hover:text-primary">Firefox</span>
+        </a>
+        <a
+          href="https://www.youtube.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group inline-flex flex-col items-center gap-1 px-2 py-2 rounded-md bg-background/40 border border-border hover:bg-primary/10 transition-colors"
+          aria-label="Open YouTube"
+        >
+          <Youtube className="w-6 h-6 text-primary" />
+          <span className="text-xs text-muted-foreground group-hover:text-primary">YouTube</span>
+        </a>
+      </div>
+
+      {/* Intro overlay */}
+      {showIntro && (
+        <div className="fixed inset-0 z-40 bg-background/80 backdrop-blur">
+          <div className="absolute inset-0 flex items-center justify-center p-6">
+            <div className="max-w-lg w-full text-center border border-primary/20 bg-card/60 rounded-xl p-6 animate-enter shadow-[var(--shadow-elegant)]">
+              <div className="mx-auto mb-4 w-24 h-24 rounded-full overflow-hidden shadow-[var(--shadow-glow)]">
+                <img src={wallpaper} alt="Alpha wolf typing at keyboard" className="w-full h-full object-cover animate-pulse" />
+              </div>
+              <h2 className="font-cyber text-2xl md:text-3xl text-primary">{typedTitle}</h2>
+              <p className="mt-2 text-sm md:text-base text-muted-foreground">{typedSubtitle}</p>
+              <button
+                type="button"
+                onClick={() => setShowIntro(false)}
+                className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-border hover:bg-primary/10 transition-colors"
+                aria-label="Skip intro"
+              >
+                Skip
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <header className="relative z-10 border-b border-primary/20 bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/40">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
