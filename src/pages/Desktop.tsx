@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Monitor, Terminal, Home, Shield, Network, Cpu, Bot, Globe, Youtube } from "lucide-react";
 import wallpaper from "@/assets/wallpapers/alpha-wolf-cyber-room.jpg";
-import TerminalWindow from "@/components/TerminalWindow";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import WindowManager, { WindowManagerHandle } from "@/components/desktop/WindowManager";
+
 const setSEO = () => {
   document.title = "CVJ Desktop GUI - Cyber Wolf Terminal";
 
@@ -100,8 +100,8 @@ const Desktop = () => {
   useEffect(() => {
     setSEO();
   }, []);
-  const [terminalOpen, setTerminalOpen] = useState(false);
-  const [appModal, setAppModal] = useState<null | { title: string }>(null);
+  const managerRef = useRef<WindowManagerHandle>(null);
+  
   const [showIntro, setShowIntro] = useState(true);
   const [typedTitle, setTypedTitle] = useState("");
   const [typedSubtitle, setTypedSubtitle] = useState("");
@@ -144,26 +144,24 @@ const Desktop = () => {
 
       {/* Desktop icons (shortcuts) */}
       <div className="absolute left-4 bottom-24 z-10 flex flex-col gap-3">
-        <a
-          href="https://www.mozilla.org/firefox/new/"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={() => managerRef.current?.openBrowser("https://www.mozilla.org/firefox/new/", "Firefox")}
           className="group inline-flex flex-col items-center gap-1 px-2 py-2 rounded-md bg-background/40 border border-border hover:bg-primary/10 transition-colors"
           aria-label="Open Firefox"
         >
           <Globe className="w-6 h-6 text-primary" />
           <span className="text-xs text-muted-foreground group-hover:text-primary">Firefox</span>
-        </a>
-        <a
-          href="https://www.youtube.com/"
-          target="_blank"
-          rel="noopener noreferrer"
+        </button>
+        <button
+          type="button"
+          onClick={() => managerRef.current?.openBrowser("https://www.youtube.com/", "YouTube")}
           className="group inline-flex flex-col items-center gap-1 px-2 py-2 rounded-md bg-background/40 border border-border hover:bg-primary/10 transition-colors"
           aria-label="Open YouTube"
         >
           <Youtube className="w-6 h-6 text-primary" />
           <span className="text-xs text-muted-foreground group-hover:text-primary">YouTube</span>
-        </a>
+        </button>
       </div>
 
       {/* Intro overlay */}
@@ -196,7 +194,7 @@ const Desktop = () => {
             <Link to="/" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-border hover:bg-primary/10 transition-colors">
               <Home className="w-4 h-4" /> Home
             </Link>
-            <button type="button" onClick={() => setTerminalOpen(true)} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-border hover:bg-primary/10 transition-colors">
+            <button type="button" onClick={() => managerRef.current?.openTerminal()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-border hover:bg-primary/10 transition-colors">
               <Terminal className="w-4 h-4" /> Open Terminal
             </button>
           </nav>
@@ -225,47 +223,26 @@ const Desktop = () => {
       {/* App Dock */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-20 bg-background/60 border border-border backdrop-blur rounded-xl px-3 py-2 shadow-[var(--shadow-elegant)]">
         <div className="flex items-center gap-2">
-          <button type="button" onClick={() => setTerminalOpen(true)} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Terminal">
+          <button type="button" onClick={() => managerRef.current?.openTerminal()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Terminal">
             <Terminal className="w-4 h-4" /> <span className="hidden sm:inline">Terminal</span>
           </button>
-          <button type="button" onClick={() => setAppModal({ title: 'Package Manager' })} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Package Manager">
+          <button type="button" onClick={() => managerRef.current?.openPlaceholder('Package Manager')} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Package Manager">
             <Cpu className="w-4 h-4" /> <span className="hidden sm:inline">Packages</span>
           </button>
-          <button type="button" onClick={() => setAppModal({ title: 'Network Tools' })} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Network Tools">
+          <button type="button" onClick={() => managerRef.current?.openPlaceholder('Network Tools')} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Network Tools">
             <Network className="w-4 h-4" /> <span className="hidden sm:inline">Network</span>
           </button>
-          <button type="button" onClick={() => setAppModal({ title: 'Security Tools' })} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Security Tools">
+          <button type="button" onClick={() => managerRef.current?.openPlaceholder('Security Tools')} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Security Tools">
             <Shield className="w-4 h-4" /> <span className="hidden sm:inline">Security</span>
           </button>
-          <button type="button" onClick={() => setAppModal({ title: 'Bot Manager' })} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Bot Manager">
+          <button type="button" onClick={() => managerRef.current?.openPlaceholder('Bot Manager')} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Bot Manager">
             <Bot className="w-4 h-4" /> <span className="hidden sm:inline">Bots</span>
           </button>
         </div>
       </div>
 
-      {/* Terminal Dialog */}
-      <Dialog open={terminalOpen} onOpenChange={setTerminalOpen}>
-        <DialogContent className="max-w-4xl w-[95vw]">
-          <DialogHeader>
-            <DialogTitle className="font-cyber text-primary">Terminal</DialogTitle>
-          </DialogHeader>
-          <div className="h-[60vh] md:h-[70vh] overflow-hidden border border-border rounded-md bg-card">
-            <TerminalWindow />
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* App Placeholder Dialog */}
-      <Dialog open={!!appModal} onOpenChange={(open) => { if (!open) setAppModal(null); }}>
-        <DialogContent className="max-w-2xl w-[90vw]">
-          <DialogHeader>
-            <DialogTitle className="font-cyber">{appModal?.title}</DialogTitle>
-          </DialogHeader>
-          <div className="text-sm text-muted-foreground">
-            {appModal?.title} GUI is coming soon. You can use the Terminal for now to access these features.
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Window Manager */}
+      <WindowManager ref={managerRef} />
 
       <footer className="relative z-10 py-6 text-center text-xs text-muted-foreground">
         © 2025 CVJ Technologies • CVJ Desktop GUI
