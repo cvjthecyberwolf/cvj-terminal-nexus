@@ -16,9 +16,10 @@ interface TerminalLine {
 
 const TerminalWindow = () => {
   const [lines, setLines] = useState<TerminalLine[]>([
-    { text: "CVJ Terminal Nexus v2.1.0 - Real Unix Terminal Environment", type: 'output' },
-    { text: "Built with real file system, package management, and command execution", type: 'output' },
-    { text: "Initializing real file system...", type: 'output' },
+    { text: "┌──(kali㉿kali)-[~]", type: 'output' },
+    { text: "└─$ CVJ Terminal Nexus v2.1.0 - Kali Linux Environment", type: 'output' },
+    { text: "  ┌─[Initializing secure terminal environment...]", type: 'output' },
+    { text: "  └─[Real Unix commands • Package management • Security tools]", type: 'output' },
     { text: "", type: 'output' }
   ]);
   const [currentInput, setCurrentInput] = useState("");
@@ -55,10 +56,13 @@ const TerminalWindow = () => {
         }
         
         setIsInitialized(true);
-        addLine("✅ Real file system initialized successfully!", 'output');
-        addLine("✅ Real Unix commands available with persistent storage", 'output');
-        addLine("✅ Real package management system ready", 'output');
-        addLine("Type 'help' for available commands", 'output');
+        addLine("  ├─[✓] Real file system initialized", 'output');
+        addLine("  ├─[✓] Unix commands ready", 'output'); 
+        addLine("  ├─[✓] Package management active", 'output');
+        addLine("  └─[✓] Security tools loaded", 'output');
+        addLine("", 'output');
+        addLine("┌──(kali㉿kali)-[~]", 'output');
+        addLine("└─$ Terminal ready. Type 'help' for commands or 'man <command>' for help.", 'output');
         addLine("", 'output');
       } catch (error) {
         addLine(`❌ Failed to initialize file system: ${error}`, 'error');
@@ -74,7 +78,7 @@ const TerminalWindow = () => {
   const executeRealCommand = async (command: string): Promise<CommandResult> => {
     const [cmd, ...args] = command.trim().split(/\s+/);
     
-    // Handle real Unix commands
+    // Handle real Unix commands with enhanced Kali Linux functionality
     switch (cmd) {
       case 'ls': return await unixCommands.ls(args);
       case 'pwd': return await unixCommands.pwd();
@@ -99,36 +103,58 @@ const TerminalWindow = () => {
       case 'free': return await unixCommands.free(args);
       case 'env': return await unixCommands.env();
       case 'apt': return await unixCommands.apt(args);
+      case 'man': return await unixCommands.man(args);
+      case 'history': return { output: commandHistory.map((cmd, i) => `${i + 1}  ${cmd}`).join('\n'), error: '', exitCode: 0 };
+      case 'date': return { output: new Date().toString(), error: '', exitCode: 0 };
+      case 'uptime': return { output: `up ${Math.floor(Date.now() / 1000 / 60)} minutes`, error: '', exitCode: 0 };
+      case 'nmap': 
+        const nmapResult = await securityTools.runScan('nmap', '', args);
+        return { output: nmapResult, error: '', exitCode: 0 };
+      case 'netstat': return { output: 'Active Internet connections\nProto Recv-Q Send-Q Local Address           Foreign Address         State\ntcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN', error: '', exitCode: 0 };
       default:
-        return { output: '', error: `${cmd}: command not found`, exitCode: 127 };
+        return { output: '', error: `bash: ${cmd}: command not found`, exitCode: 127 };
     }
   };
 
   const executeCommand = useCallback(async (command: string) => {
     if (!isInitialized) {
-      addLine("⚠️ File system not initialized yet. Please wait...", 'error');
+      addLine("┌──(kali㉿kali)-[~]", 'error');
+      addLine("└─$ Terminal not ready yet. Please wait for initialization...", 'error');
       return;
     }
 
-    const [cmd, ...args] = command.trim().split(/\s+/);
+    const trimmedCommand = command.trim();
+    if (!trimmedCommand) return;
+
+    // Add command to history
+    setCommandHistory(prev => [...prev, trimmedCommand]);
+    
+    // Show command prompt with command
+    addLine(`┌──(kali㉿kali)-[${currentDir.replace('/home/kali', '~')}]`, 'input');
+    addLine(`└─$ ${trimmedCommand}`, 'input');
+
+    const [cmd, ...args] = trimmedCommand.split(/\s+/);
     
     // Handle special CVJ Terminal commands
     switch (cmd) {
       case 'help':
-        addLine("CVJ Terminal Nexus - Real Unix Environment Commands:", 'output');
-        addLine("", 'output');
-        addLine("🔧 Real Unix Commands (with persistent file system):", 'output');
-        addLine("  ls [-la] [path]   - List directory contents", 'output');
-        addLine("  cd [path]         - Change directory", 'output');
-        addLine("  pwd               - Print working directory", 'output');
-        addLine("  mkdir <dir>       - Create directory", 'output');
-        addLine("  rm <file>         - Remove files", 'output');
-        addLine("  cat <file>        - Display file contents", 'output');
-        addLine("  echo <text>       - Display text", 'output');
-        addLine("  touch <file>      - Create/update file", 'output');
-        addLine("  grep <pattern> <file> - Search in files", 'output');
-        addLine("  wget <url>        - Download files from internet", 'output');
-        addLine("", 'output');
+        addLine("┌─[CVJ Kali Linux Terminal - Available Commands]", 'output');
+        addLine("│", 'output');
+        addLine("├─[🔧 Unix Commands]", 'output');
+        addLine("│  ls [-la] [path]      - List directory contents", 'output');
+        addLine("│  cd [path]            - Change directory", 'output');
+        addLine("│  pwd                  - Print working directory", 'output');
+        addLine("│  mkdir <dir>          - Create directory", 'output');
+        addLine("│  rm <file>            - Remove files", 'output');
+        addLine("│  cat <file>           - Display file contents", 'output');
+        addLine("│  echo <text>          - Display text", 'output');
+        addLine("│  touch <file>         - Create/update file", 'output');
+        addLine("│  grep <pattern>       - Search in files", 'output');
+        addLine("│  wget <url>           - Download files", 'output');
+        addLine("│  man <command>        - Show manual pages", 'output');
+        addLine("│  history              - Show command history", 'output');
+        addLine("│  date, uptime         - System information", 'output');
+        addLine("│", 'output');
         addLine("📦 CVJ Package Manager v2.1.0 (Production Ready):", 'output');
         addLine("  cvj install <pkg> - Install packages from repositories", 'output');
         addLine("  cvj remove <pkg>  - Remove installed packages", 'output');

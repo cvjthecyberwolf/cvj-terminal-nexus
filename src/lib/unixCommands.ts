@@ -410,6 +410,23 @@ Swap:        2097152           0     2097152`;
       .join('\n');
     return { output, exitCode: 0 };
   }
+
+  async man(args: string[] = []): Promise<CommandResult> {
+    if (args.length === 0) {
+      return { output: 'What manual page do you want?', error: '', exitCode: 1 };
+    }
+
+    const command = args[0];
+    const manPages: Record<string, string> = {
+      'ls': 'LS(1)\n\nNAME\n  ls - list directory contents\n\nSYNOPSIS\n  ls [OPTION]... [FILE]...\n\nDESCRIPTION\n  List information about the FILEs (the current directory by default).\n\n  -a, --all\n    do not ignore entries starting with .\n  -l  use a long listing format',
+      'cd': 'CD(1)\n\nNAME\n  cd - change the shell working directory\n\nSYNOPSIS\n  cd [dir]\n\nDESCRIPTION\n  Change the current directory to DIR.  The default DIR is the value of the HOME variable.',
+      'cat': 'CAT(1)\n\nNAME\n  cat - concatenate files and print on the standard output\n\nSYNOPSIS\n  cat [OPTION]... [FILE]...\n\nDESCRIPTION\n  Concatenate FILE(s) to standard output.',
+      'nmap': 'NMAP(1)\n\nNAME\n  nmap - Network exploration tool and security / port scanner\n\nSYNOPSIS\n  nmap [Scan Type...] [Options] {target specification}\n\nDESCRIPTION\n  Nmap ("Network Mapper") is an open source tool for network exploration and security auditing.'
+    };
+
+    const manPage = manPages[command] || `No manual entry for ${command}`;
+    return { output: manPage, error: '', exitCode: 0 };
+  }
 }
 
 export const unixCommands = new UnixCommands();
