@@ -98,6 +98,7 @@ const DesktopWindow = ({
       onMouseDown={() => onFocus(id)}
       role="dialog"
       aria-label={title}
+      data-window-id={id}
     >
       <header
         className={`flex items-center justify-between px-3 py-2 cursor-move border-b border-border ${

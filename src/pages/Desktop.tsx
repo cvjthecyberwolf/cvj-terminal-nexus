@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Monitor, Terminal, Home, Shield, Network, Cpu, Bot, Globe, Youtube } from "lucide-react";
 import wallpaper from "@/assets/wallpapers/alpha-wolf-cyber-room.jpg";
 import WindowManager, { WindowManagerHandle } from "@/components/desktop/WindowManager";
+import Taskbar from "@/components/desktop/Taskbar";
+import ApplicationsMenu from "@/components/desktop/ApplicationsMenu";
 
 const setSEO = () => {
   document.title = "CVJ Desktop GUI - Cyber Wolf Terminal";
@@ -97,14 +99,15 @@ const WiresharkPanel = () => (
 );
 
 const Desktop = () => {
-  useEffect(() => {
-    setSEO();
-  }, []);
-  const managerRef = useRef<WindowManagerHandle>(null);
-  
   const [showIntro, setShowIntro] = useState(true);
   const [typedTitle, setTypedTitle] = useState("");
   const [typedSubtitle, setTypedSubtitle] = useState("");
+  const [windows, setWindows] = useState<any[]>([]);
+  const managerRef = useRef<WindowManagerHandle>(null);
+
+  useEffect(() => {
+    setSEO();
+  }, []);
 
   useEffect(() => {
     const titleFull = "CVJ The Cyber Wolf";
@@ -124,6 +127,17 @@ const Desktop = () => {
       }
     }, 50);
     return () => window.clearInterval(tId);
+  }, []);
+
+  useEffect(() => {
+    const updateWindows = () => {
+      if (managerRef.current) {
+        setWindows(managerRef.current.getWindows());
+      }
+    };
+    
+    const interval = setInterval(updateWindows, 100);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -240,6 +254,25 @@ const Desktop = () => {
           </button>
         </div>
       </div>
+
+      {/* Applications Menu */}
+      <ApplicationsMenu
+        onOpenTerminal={() => managerRef.current?.openTerminal()}
+        onOpenBrowser={(url, title) => managerRef.current?.openBrowser(url, title)}
+      />
+
+      {/* Taskbar */}
+      <Taskbar
+        windows={windows}
+        onFocusWindow={(id) => managerRef.current?.focusWindow(id)}
+        onRestoreWindow={(id) => managerRef.current?.restoreWindow(id)}
+        onCloseWindow={(id) => {
+          const closeButton = document.querySelector(`[data-window-id="${id}"] button[aria-label="Close"]`) as HTMLButtonElement;
+          if (closeButton) {
+            closeButton.click();
+          }
+        }}
+      />
 
       {/* Window Manager */}
       <WindowManager ref={managerRef} />

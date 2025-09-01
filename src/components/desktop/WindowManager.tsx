@@ -14,12 +14,17 @@ export interface WindowItem {
   url?: string;
   z: number;
   maximized?: boolean;
+  minimized?: boolean;
 }
 
 export interface WindowManagerHandle {
   openTerminal: () => void;
   openBrowser: (url: string, title?: string) => void;
   openPlaceholder: (title: string) => void;
+  getWindows: () => WindowItem[];
+  focusWindow: (id: string) => void;
+  minimizeWindow: (id: string) => void;
+  restoreWindow: (id: string) => void;
 }
 
 const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
@@ -36,6 +41,10 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
   const close = (id: string) => setWindows((prev) => prev.filter((w) => w.id !== id));
   const toggleMax = (id: string) =>
     setWindows((prev) => prev.map((w) => (w.id === id ? { ...w, maximized: !w.maximized } : w)));
+  const minimize = (id: string) =>
+    setWindows((prev) => prev.map((w) => (w.id === id ? { ...w, minimized: true } : w)));
+  const restore = (id: string) =>
+    setWindows((prev) => prev.map((w) => (w.id === id ? { ...w, minimized: false } : w)));
 
   useImperativeHandle(ref, () => ({
     openTerminal: () => {
@@ -63,6 +72,10 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
         { id, type: "placeholder", title, icon: <Boxes className="w-4 h-4" />, z: ++zCounter.current },
       ]);
     },
+    getWindows: () => windows,
+    focusWindow: focus,
+    minimizeWindow: minimize,
+    restoreWindow: restore,
   }));
 
   const renderContent = (w: WindowItem) => {
@@ -84,23 +97,26 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
 
   return (
     <div className="pointer-events-none">
-      {ordered.map((w, i) => (
-        <div key={w.id} className="pointer-events-auto">
-          <DesktopWindow
-            id={w.id}
-            title={w.title}
-            icon={w.icon}
-            zIndex={w.z}
-            focused={i === ordered.length - 1}
-            isMaximized={w.maximized}
-            onFocus={focus}
-            onClose={close}
-            onMaximize={toggleMax}
-          >
-            {renderContent(w)}
-          </DesktopWindow>
-        </div>
-      ))}
+      {ordered
+        .filter((w) => !w.minimized)
+        .map((w, i, filteredWindows) => (
+          <div key={w.id} className="pointer-events-auto">
+            <DesktopWindow
+              id={w.id}
+              title={w.title}
+              icon={w.icon}
+              zIndex={w.z}
+              focused={i === filteredWindows.length - 1}
+              isMaximized={w.maximized}
+              onFocus={focus}
+              onClose={close}
+              onMaximize={toggleMax}
+              onMinimize={minimize}
+            >
+              {renderContent(w)}
+            </DesktopWindow>
+          </div>
+        ))}
     </div>
   );
 });
