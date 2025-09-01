@@ -16,8 +16,8 @@ interface TerminalLine {
 
 const TerminalWindow = () => {
   const [lines, setLines] = useState<TerminalLine[]>([
-    { text: "┌──(kali㉿kali)-[~]", type: 'output' },
-    { text: "└─$ CVJ Terminal Nexus v2.1.0 - Kali Linux Environment", type: 'output' },
+    { text: "┌──(cvj@terminalos)-[~]", type: 'output' },
+    { text: "└─$ CVJ Terminal Nexus v2.1.0 - TerminalOS Environment", type: 'output' },
     { text: "  ┌─[Initializing secure terminal environment...]", type: 'output' },
     { text: "  └─[Real Unix commands • Package management • Security tools]", type: 'output' },
     { text: "", type: 'output' }
@@ -26,7 +26,7 @@ const TerminalWindow = () => {
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [currentDir, setCurrentDir] = useState("/home/kali");
+  const [currentDir, setCurrentDir] = useState("/home/cvj");
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -61,7 +61,7 @@ const TerminalWindow = () => {
         addLine("  ├─[✓] Package management active", 'output');
         addLine("  └─[✓] Security tools loaded", 'output');
         addLine("", 'output');
-        addLine("┌──(kali㉿kali)-[~]", 'output');
+        addLine("┌──(cvj@terminalos)-[~]", 'output');
         addLine("└─$ Terminal ready. Type 'help' for commands or 'man <command>' for help.", 'output');
         addLine("", 'output');
       } catch (error) {
@@ -118,7 +118,7 @@ const TerminalWindow = () => {
 
   const executeCommand = useCallback(async (command: string) => {
     if (!isInitialized) {
-      addLine("┌──(kali㉿kali)-[~]", 'error');
+      addLine("┌──(cvj@terminalos)-[~]", 'error');
       addLine("└─$ Terminal not ready yet. Please wait for initialization...", 'error');
       return;
     }
@@ -130,7 +130,7 @@ const TerminalWindow = () => {
     setCommandHistory(prev => [...prev, trimmedCommand]);
     
     // Show command prompt with command
-    addLine(`┌──(kali㉿kali)-[${currentDir.replace('/home/kali', '~')}]`, 'input');
+    addLine(`┌──(cvj@terminalos)-[${currentDir.replace('/home/cvj', '~')}]`, 'input');
     addLine(`└─$ ${trimmedCommand}`, 'input');
 
     const [cmd, ...args] = trimmedCommand.split(/\s+/);

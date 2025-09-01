@@ -10,11 +10,11 @@ export interface CommandResult {
 
 // Real Unix command implementations
 export class UnixCommands {
-  private currentUser = 'kali';
+  private currentUser = 'cvj';
   private environment: Record<string, string> = {
     PATH: '/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin',
-    HOME: '/home/kali',
-    USER: 'kali',
+    HOME: '/home/cvj',
+    USER: 'cvj',
     SHELL: '/bin/bash',
     TERM: 'xterm-256color',
     LANG: 'en_US.UTF-8',
@@ -186,7 +186,7 @@ export class UnixCommands {
     
     if (all) {
       return { 
-        output: 'Linux kali-terminal 6.6.15-amd64 #1 SMP PREEMPT_DYNAMIC Kali 6.6.15-2kali1 (2024-01-11) x86_64 GNU/Linux', 
+        output: 'Linux terminalos 6.6.15-amd64 #1 SMP PREEMPT_DYNAMIC CVJ 6.6.15-2terminalos1 (2024-01-11) x86_64 GNU/Linux', 
         exitCode: 0 
       };
     }
