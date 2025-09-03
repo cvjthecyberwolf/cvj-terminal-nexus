@@ -93,7 +93,7 @@ const DesktopWindow = ({
       ref={winRef}
       className={`$${""} ${
         isMaximized ? "fixed inset-16 md:inset-12 bottom-28" : "absolute"
-      } bg-card/95 border border-border rounded-lg shadow-[var(--shadow-elegant)] overflow-hidden select-none`}
+      } bg-card/95 border border-border rounded-lg shadow-[var(--shadow-elegant)] overflow-hidden backdrop-blur select-none`}
       style={containerStyle}
       onMouseDown={() => onFocus(id)}
       role="dialog"
