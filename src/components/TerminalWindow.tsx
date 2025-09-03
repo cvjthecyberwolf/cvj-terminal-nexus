@@ -39,27 +39,36 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
   useEffect(() => {
     const initFileSystem = async () => {
       try {
-        await fileSystem.init();
+        // Add timeout to prevent hanging
+        const initPromise = fileSystem.init();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Initialization timeout')), 5000)
+        );
+        
+        await Promise.race([initPromise, timeoutPromise]);
         
         // Setup native environment if on mobile
         if (Capacitor.isNativePlatform()) {
-          const setupResult = await AndroidShell.setupLinuxEnvironment();
-          addLine("📱 Running on native Android platform", 'output');
-          addLine("🔧 Setting up Linux environment...", 'output');
-          addLine(setupResult.output, setupResult.exitCode === 0 ? 'output' : 'error');
-          
-          // Check for root access
-          const hasRoot = await AndroidShell.checkRootAccess();
-          if (hasRoot) {
-            addLine("🔓 Root access available - all tools enabled", 'output');
-          } else {
-            addLine("⚠️ No root access - some tools may be limited", 'output');
+          try {
+            const setupResult = await AndroidShell.setupLinuxEnvironment();
+            addLine("📱 Running on native Android platform", 'output');
+            addLine("🔧 Setting up Linux environment...", 'output');
+            addLine(setupResult.output, setupResult.exitCode === 0 ? 'output' : 'error');
+            
+            // Check for root access
+            const hasRoot = await AndroidShell.checkRootAccess();
+            if (hasRoot) {
+              addLine("🔓 Root access available - all tools enabled", 'output');
+            } else {
+              addLine("⚠️ No root access - some tools may be limited", 'output');
+            }
+          } catch (nativeError) {
+            addLine(`⚠️ Native setup failed: ${nativeError}`, 'output');
           }
         } else {
           addLine("🌐 Running in web mode - build Android app for real tools", 'output');
         }
         
-        setIsInitialized(true);
         addLine("  ├─[✓] Real file system initialized", 'output');
         addLine("  ├─[✓] Unix commands ready", 'output'); 
         addLine("  ├─[✓] Package management active", 'output');
@@ -69,7 +78,15 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
         addLine("└─$ Terminal ready. Type 'help' for commands or 'man <command>' for help.", 'output');
         addLine("", 'output');
       } catch (error) {
-        addLine(`❌ Failed to initialize file system: ${error}`, 'error');
+        addLine(`⚠️ Initialization failed: ${error}`, 'error');
+        addLine("🔧 Terminal running in basic mode", 'output');
+        addLine("", 'output');
+        addLine("┌──(cvj@terminalos)-[~]", 'output');
+        addLine("└─$ Terminal ready. Type 'help' for commands.", 'output');
+        addLine("", 'output');
+      } finally {
+        // Always enable the terminal, even if initialization fails
+        setIsInitialized(true);
       }
     };
     initFileSystem();
