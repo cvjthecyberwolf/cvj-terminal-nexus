@@ -356,6 +356,10 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
             addLine("  cvj repo list           - List repositories", 'output');
             addLine("  cvj repo add <url>      - Add repository", 'output');
             addLine("  cvj repo remove <name>  - Remove repository", 'output');
+            addLine("", 'output');
+            addLine("⚡ System Power Commands:", 'output');
+            addLine("  cvj reboot              - Restart CVJ Terminal OS", 'output');
+            addLine("  cvj poweroff            - Shutdown CVJ Terminal OS", 'output');
             break;
           }
 
@@ -554,6 +558,38 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
                 addLine("Use 'cvj repo list', 'cvj repo add <url>', or 'cvj repo remove <name>'", 'error');
                 break;
             }
+            break;
+
+          case 'reboot':
+            addLine("🔄 CVJ Terminal OS - Initiating system reboot...", 'output');
+            addLine("Stopping all running processes...", 'output');
+            addLine("Saving system state...", 'output');
+            addLine("Unmounting filesystems...", 'output');
+            addLine("Restarting CVJ Terminal OS kernel...", 'output');
+            setTimeout(() => {
+              addLine("", 'output');
+              addLine("🚀 CVJ Terminal OS v2.1.0 - REBOOT COMPLETE", 'output');
+              addLine("System uptime: 0 minutes", 'output');
+              addLine("All services restored successfully", 'output');
+              addLine("Welcome back, cvj!", 'output');
+              setCurrentDir('/home/cvj');
+            }, 3000);
+            break;
+
+          case 'poweroff':
+            addLine("⚡ CVJ Terminal OS - Initiating system shutdown...", 'output');
+            addLine("Stopping all running processes...", 'output');
+            addLine("Saving system state...", 'output');
+            addLine("Unmounting filesystems...", 'output');
+            addLine("Powering off CVJ Terminal OS...", 'output');
+            setTimeout(() => {
+              addLine("", 'output');
+              addLine("💤 System halted. CVJ Terminal OS is now offline.", 'output');
+              addLine("Connection to CVJ Terminal will be closed.", 'output');
+              if (onClose) {
+                setTimeout(() => onClose(), 2000);
+              }
+            }, 3000);
             break;
 
           default:
