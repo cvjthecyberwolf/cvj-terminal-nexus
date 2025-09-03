@@ -14,7 +14,11 @@ interface TerminalLine {
   type: 'input' | 'output' | 'error';
 }
 
-const TerminalWindow = () => {
+interface TerminalWindowProps {
+  onClose?: () => void;
+}
+
+const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
   const [lines, setLines] = useState<TerminalLine[]>([
     { text: "┌──(cvj@terminalos)-[~]", type: 'output' },
     { text: "└─$ CVJ Terminal Nexus v2.1.0 - TerminalOS Environment", type: 'output' },
@@ -202,13 +206,23 @@ const TerminalWindow = () => {
         addLine("  bot templates     - List available bot templates", 'output');
         addLine("  bot logs <id>     - View bot logs", 'output');
         addLine("", 'output');
-        addLine("🧹 Utility Commands:", 'output');
-        addLine("  clear             - Clear terminal", 'output');
-        addLine("  history           - Command history", 'output');
+         addLine("🧹 Utility Commands:", 'output');
+         addLine("  clear             - Clear terminal", 'output');
+         addLine("  exit              - Close terminal window", 'output');
+         addLine("  history           - Command history", 'output');
         break;
 
       case 'clear':
         setLines([]);
+        break;
+
+      case 'exit':
+        if (onClose) {
+          addLine("Closing terminal...", 'output');
+          setTimeout(() => onClose(), 500);
+        } else {
+          addLine("Cannot exit: No close callback available", 'error');
+        }
         break;
 
       case 'install':

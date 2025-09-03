@@ -81,7 +81,7 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
   const renderContent = (w: WindowItem) => {
     switch (w.type) {
       case "terminal":
-        return <TerminalWindow />;
+        return <TerminalWindow onClose={() => close(w.id)} />;
       case "browser":
         return <BrowserWindow initialUrl={w.url || "https://example.com"} title={w.title} />;
       default:
