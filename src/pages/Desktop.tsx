@@ -240,16 +240,16 @@ const Desktop = () => {
           <button type="button" onClick={() => managerRef.current?.openTerminal()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Terminal">
             <Terminal className="w-4 h-4" /> <span className="hidden sm:inline">Terminal</span>
           </button>
-          <button type="button" onClick={() => managerRef.current?.openPlaceholder('Package Manager')} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Package Manager">
+          <button type="button" onClick={() => managerRef.current?.openPackageManager()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Package Manager">
             <Cpu className="w-4 h-4" /> <span className="hidden sm:inline">Packages</span>
           </button>
-          <button type="button" onClick={() => managerRef.current?.openPlaceholder('Network Tools')} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Network Tools">
+          <button type="button" onClick={() => managerRef.current?.openNetworkTools()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Network Tools">
             <Network className="w-4 h-4" /> <span className="hidden sm:inline">Network</span>
           </button>
-          <button type="button" onClick={() => managerRef.current?.openPlaceholder('Security Tools')} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Security Tools">
+          <button type="button" onClick={() => managerRef.current?.openSecurityTools()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Security Tools">
             <Shield className="w-4 h-4" /> <span className="hidden sm:inline">Security</span>
           </button>
-          <button type="button" onClick={() => managerRef.current?.openPlaceholder('Bot Manager')} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Bot Manager">
+          <button type="button" onClick={() => managerRef.current?.openBotManager()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Bot Manager">
             <Bot className="w-4 h-4" /> <span className="hidden sm:inline">Bots</span>
           </button>
         </div>

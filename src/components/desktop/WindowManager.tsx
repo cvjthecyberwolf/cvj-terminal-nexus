@@ -2,9 +2,13 @@ import { forwardRef, ReactNode, useImperativeHandle, useMemo, useRef, useState }
 import DesktopWindow from "./DesktopWindow";
 import TerminalWindow from "@/components/TerminalWindow";
 import BrowserWindow from "./BrowserWindow";
-import { Terminal, Globe, Boxes } from "lucide-react";
+import PackageManagerWindow from "./PackageManagerWindow";
+import NetworkToolsWindow from "./NetworkToolsWindow";
+import SecurityToolsWindow from "./SecurityToolsWindow";
+import BotManagerWindow from "./BotManagerWindow";
+import { Terminal, Globe, Package, Network, Shield, Bot } from "lucide-react";
 
-export type WindowType = "terminal" | "browser" | "placeholder";
+export type WindowType = "terminal" | "browser" | "packageManager" | "networkTools" | "securityTools" | "botManager";
 
 export interface WindowItem {
   id: string;
@@ -20,7 +24,10 @@ export interface WindowItem {
 export interface WindowManagerHandle {
   openTerminal: () => void;
   openBrowser: (url: string, title?: string) => void;
-  openPlaceholder: (title: string) => void;
+  openPackageManager: () => void;
+  openNetworkTools: () => void;
+  openSecurityTools: () => void;
+  openBotManager: () => void;
   getWindows: () => WindowItem[];
   focusWindow: (id: string) => void;
   minimizeWindow: (id: string) => void;
@@ -65,12 +72,21 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
         },
       ]);
     },
-    openPlaceholder: (title: string) => {
-      const id = `app-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-      setWindows((prev) => [
-        ...prev,
-        { id, type: "placeholder", title, icon: <Boxes className="w-4 h-4" />, z: ++zCounter.current },
-      ]);
+    openPackageManager: () => {
+      const id = `pkg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      setWindows((prev) => [...prev, { id, type: "packageManager", title: "Package Manager", icon: <Package className="w-4 h-4" />, z: ++zCounter.current }]);
+    },
+    openNetworkTools: () => {
+      const id = `net-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      setWindows((prev) => [...prev, { id, type: "networkTools", title: "Network Tools", icon: <Network className="w-4 h-4" />, z: ++zCounter.current }]);
+    },
+    openSecurityTools: () => {
+      const id = `sec-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      setWindows((prev) => [...prev, { id, type: "securityTools", title: "Security Tools", icon: <Shield className="w-4 h-4" />, z: ++zCounter.current }]);
+    },
+    openBotManager: () => {
+      const id = `bot-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      setWindows((prev) => [...prev, { id, type: "botManager", title: "Bot Manager", icon: <Bot className="w-4 h-4" />, z: ++zCounter.current }]);
     },
     getWindows: () => windows,
     focusWindow: focus,
@@ -84,10 +100,18 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
         return <TerminalWindow onClose={() => close(w.id)} />;
       case "browser":
         return <BrowserWindow initialUrl={w.url || "https://example.com"} title={w.title} />;
+      case "packageManager":
+        return <PackageManagerWindow onClose={() => close(w.id)} />;
+      case "networkTools":
+        return <NetworkToolsWindow onClose={() => close(w.id)} />;
+      case "securityTools":
+        return <SecurityToolsWindow onClose={() => close(w.id)} />;
+      case "botManager":
+        return <BotManagerWindow onClose={() => close(w.id)} />;
       default:
         return (
           <div className="p-4 text-sm text-muted-foreground">
-            {w.title} is coming soon. Use the Terminal for now to access these features.
+            Unknown window type: {w.type}
           </div>
         );
     }
