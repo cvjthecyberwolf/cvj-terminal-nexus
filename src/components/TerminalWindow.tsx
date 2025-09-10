@@ -38,6 +38,7 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
   // Initialize the real file system
   useEffect(() => {
     const initFileSystem = async () => {
+      console.log('🔄 Starting terminal initialization...');
       try {
         // Add timeout to prevent hanging
         const initPromise = fileSystem.init();
@@ -46,6 +47,7 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
         );
         
         await Promise.race([initPromise, timeoutPromise]);
+        console.log('✅ File system initialized successfully');
         
         // Setup native environment if on mobile
         if (Capacitor.isNativePlatform()) {
@@ -86,7 +88,17 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
         addLine("", 'output');
       } finally {
         // Always enable the terminal, even if initialization fails
+        console.log('🔧 Setting terminal as initialized...');
         setIsInitialized(true);
+        console.log('✅ Terminal initialization complete');
+        
+        // Ensure input gets focus after a brief delay
+        setTimeout(() => {
+          if (inputRef.current && !isMobile) {
+            console.log('🎯 Focusing terminal input...');
+            inputRef.current.focus();
+          }
+        }, 100);
       }
     };
     initFileSystem();
@@ -138,15 +150,23 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
   };
 
   const executeCommand = useCallback(async (command: string) => {
+    console.log(`🎯 Executing command: "${command}"`);
+    
     if (!isInitialized) {
+      console.log('❌ Terminal not initialized yet');
       addLine("┌──(cvj@terminalos)-[~]", 'error');
       addLine("└─$ Terminal not ready yet. Please wait for initialization...", 'error');
       return;
     }
 
     const trimmedCommand = command.trim();
-    if (!trimmedCommand) return;
+    if (!trimmedCommand) {
+      console.log('❌ Empty command received');
+      return;
+    }
 
+    console.log(`✅ Processing command: ${trimmedCommand}`);
+    
     // Add command to history
     setCommandHistory(prev => [...prev, trimmedCommand]);
     
