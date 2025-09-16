@@ -149,6 +149,7 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
       case 'free': return await unixCommands.free(args);
       case 'env': return await unixCommands.env();
       case 'apt': return await unixCommands.apt(args);
+      case 'vm': return await unixCommands.vm(args);
       case 'man': return await unixCommands.man(args);
       case 'history': return { output: commandHistory.map((cmd, i) => `${i + 1}  ${cmd}`).join('\n'), error: '', exitCode: 0 };
       case 'date': return { output: new Date().toString(), error: '', exitCode: 0 };
@@ -228,6 +229,7 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
           addLine("│  grep <pattern>       - Search in files", 'output');
           addLine("│  wget <url>           - Download files", 'output');
           addLine("│  man <command>        - Show manual pages", 'output');
+          addLine("│  vm <command>         - Virtual machine management", 'output');
           addLine("│  history              - Show command history", 'output');
           addLine("│  date, uptime         - System information", 'output');
           addLine("│", 'output');

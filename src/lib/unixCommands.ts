@@ -1,6 +1,7 @@
 import { fileSystem } from './fileSystem';
 import { AndroidShell } from './nativeShell';
 import { Capacitor } from '@capacitor/core';
+import { osManager } from './osManager';
 
 export interface CommandResult {
   output: string;
@@ -421,11 +422,202 @@ Swap:        2097152           0     2097152`;
       'ls': 'LS(1)\n\nNAME\n  ls - list directory contents\n\nSYNOPSIS\n  ls [OPTION]... [FILE]...\n\nDESCRIPTION\n  List information about the FILEs (the current directory by default).\n\n  -a, --all\n    do not ignore entries starting with .\n  -l  use a long listing format',
       'cd': 'CD(1)\n\nNAME\n  cd - change the shell working directory\n\nSYNOPSIS\n  cd [dir]\n\nDESCRIPTION\n  Change the current directory to DIR.  The default DIR is the value of the HOME variable.',
       'cat': 'CAT(1)\n\nNAME\n  cat - concatenate files and print on the standard output\n\nSYNOPSIS\n  cat [OPTION]... [FILE]...\n\nDESCRIPTION\n  Concatenate FILE(s) to standard output.',
-      'nmap': 'NMAP(1)\n\nNAME\n  nmap - Network exploration tool and security / port scanner\n\nSYNOPSIS\n  nmap [Scan Type...] [Options] {target specification}\n\nDESCRIPTION\n  Nmap ("Network Mapper") is an open source tool for network exploration and security auditing.'
+      'nmap': 'NMAP(1)\n\nNAME\n  nmap - Network exploration tool and security / port scanner\n\nSYNOPSIS\n  nmap [Scan Type...] [Options] {target specification}\n\nDESCRIPTION\n  Nmap ("Network Mapper") is an open source tool for network exploration and security auditing.',
+      'vm': 'VM(1)\n\nNAME\n  vm - virtual machine management utility\n\nSYNOPSIS\n  vm <command> [options]\n\nCOMMANDS\n  list                 - List all virtual machine instances\n  create <template>    - Create new VM from template\n  start <id>          - Start a virtual machine\n  stop <id>           - Stop a virtual machine\n  connect <id>        - Connect to a running VM\n  delete <id>         - Delete a virtual machine\n  templates           - List available OS templates'
     };
 
     const manPage = manPages[command] || `No manual entry for ${command}`;
     return { output: manPage, error: '', exitCode: 0 };
+  }
+
+  // Virtual Machine Management Commands
+  async vm(args: string[]): Promise<CommandResult> {
+    if (args.length === 0) {
+      return { 
+        output: '', 
+        error: 'vm: missing subcommand\nUsage: vm <list|create|start|stop|connect|delete|templates> [args...]', 
+        exitCode: 1 
+      };
+    }
+
+    const subcommand = args[0];
+    const vmArgs = args.slice(1);
+
+    try {
+      switch (subcommand) {
+        case 'list':
+          return await this.vmList();
+        
+        case 'templates':
+          return await this.vmTemplates();
+        
+        case 'create':
+          if (vmArgs.length === 0) {
+            return { output: '', error: 'vm create: missing template ID\nUse "vm templates" to see available templates', exitCode: 1 };
+          }
+          return await this.vmCreate(vmArgs[0], vmArgs[1]);
+        
+        case 'start':
+          if (vmArgs.length === 0) {
+            return { output: '', error: 'vm start: missing instance ID\nUse "vm list" to see available instances', exitCode: 1 };
+          }
+          return await this.vmStart(vmArgs[0]);
+        
+        case 'stop':
+          if (vmArgs.length === 0) {
+            return { output: '', error: 'vm stop: missing instance ID\nUse "vm list" to see running instances', exitCode: 1 };
+          }
+          return await this.vmStop(vmArgs[0]);
+        
+        case 'connect':
+          if (vmArgs.length === 0) {
+            return { output: '', error: 'vm connect: missing instance ID\nUse "vm list" to see running instances', exitCode: 1 };
+          }
+          return await this.vmConnect(vmArgs[0]);
+        
+        case 'delete':
+          if (vmArgs.length === 0) {
+            return { output: '', error: 'vm delete: missing instance ID\nUse "vm list" to see available instances', exitCode: 1 };
+          }
+          return await this.vmDelete(vmArgs[0]);
+        
+        default:
+          return { 
+            output: '', 
+            error: `vm: unknown subcommand '${subcommand}'\nUsage: vm <list|create|start|stop|connect|delete|templates> [args...]`, 
+            exitCode: 1 
+          };
+      }
+    } catch (error) {
+      return { 
+        output: '', 
+        error: `vm: ${error instanceof Error ? error.message : 'Unknown error'}`, 
+        exitCode: 1 
+      };
+    }
+  }
+
+  private async vmList(): Promise<CommandResult> {
+    const instances = osManager.getRunningInstances();
+    const stats = osManager.getSystemStats();
+    
+    if (instances.length === 0) {
+      return {
+        output: 'No virtual machines found.\nUse "vm create <template>" to create your first VM.',
+        exitCode: 0
+      };
+    }
+
+    const header = 'ID                    NAME                TYPE      STATUS     ARCH      MEMORY    DISK';
+    const separator = '─'.repeat(header.length);
+    
+    const rows = instances.map(instance => {
+      const id = instance.id.padEnd(20);
+      const name = instance.name.substring(0, 18).padEnd(18);
+      const type = instance.type.padEnd(8);
+      const status = instance.status.padEnd(9);
+      const arch = instance.architecture.substring(0, 8).padEnd(8);
+      const memory = `${instance.resources.memory}MB`.padEnd(8);
+      const disk = `${instance.resources.disk}MB`;
+      
+      return `${id} ${name} ${type} ${status} ${arch} ${memory} ${disk}`;
+    });
+
+    const footer = `\nSystem Resources:
+Memory: ${stats.usedMemory}MB / ${stats.totalMemory}MB (${Math.round((stats.usedMemory / stats.totalMemory) * 100)}% used)
+Disk:   ${stats.usedDisk}MB / ${stats.totalDisk}MB (${Math.round((stats.usedDisk / stats.totalDisk) * 100)}% used)
+Running: ${stats.runningInstances} / ${stats.totalInstances} instances`;
+
+    return {
+      output: [header, separator, ...rows, footer].join('\n'),
+      exitCode: 0
+    };
+  }
+
+  private async vmTemplates(): Promise<CommandResult> {
+    const templates = osManager.getAvailableTemplates();
+    
+    const header = 'TEMPLATE ID         NAME                  TYPE      VERSION    ARCH      MIN RAM   DISK SIZE';
+    const separator = '─'.repeat(header.length);
+    
+    const rows = templates.map(template => {
+      const id = template.id.padEnd(18);
+      const name = template.name.substring(0, 20).padEnd(20);
+      const type = template.type.padEnd(8);
+      const version = template.version.substring(0, 9).padEnd(9);
+      const arch = template.architecture.substring(0, 8).padEnd(8);
+      const minRam = `${template.minMemory}MB`.padEnd(8);
+      const diskSize = `${template.diskSize}MB`;
+      
+      return `${id} ${name} ${type} ${version} ${arch} ${minRam} ${diskSize}`;
+    });
+
+    const footer = `\nUsage: vm create <template-id> [custom-name]
+Example: vm create kali-linux "My Kali VM"`;
+
+    return {
+      output: [header, separator, ...rows, footer].join('\n'),
+      exitCode: 0
+    };
+  }
+
+  private async vmCreate(templateId: string, customName?: string): Promise<CommandResult> {
+    try {
+      const instance = await osManager.createInstance(templateId, customName);
+      return {
+        output: `Creating virtual machine...
+Instance ID: ${instance.id}
+Name: ${instance.name}
+Type: ${instance.type} ${instance.version}
+Architecture: ${instance.architecture}
+Resources: ${instance.resources.memory}MB RAM, ${instance.resources.disk}MB Disk
+
+VM created successfully! Use "vm start ${instance.id}" to boot it.`,
+        exitCode: 0
+      };
+    } catch (error) {
+      return {
+        output: '',
+        error: error instanceof Error ? error.message : 'Failed to create VM',
+        exitCode: 1
+      };
+    }
+  }
+
+  private async vmStart(instanceId: string): Promise<CommandResult> {
+    const result = await osManager.startInstance(instanceId);
+    return {
+      output: result.output,
+      error: result.error,
+      exitCode: result.exitCode
+    };
+  }
+
+  private async vmStop(instanceId: string): Promise<CommandResult> {
+    const result = await osManager.stopInstance(instanceId);
+    return {
+      output: result.output,
+      error: result.error,
+      exitCode: result.exitCode
+    };
+  }
+
+  private async vmConnect(instanceId: string): Promise<CommandResult> {
+    const result = await osManager.connectToInstance(instanceId);
+    return {
+      output: result.output,
+      error: result.error,
+      exitCode: result.exitCode
+    };
+  }
+
+  private async vmDelete(instanceId: string): Promise<CommandResult> {
+    const result = await osManager.deleteInstance(instanceId);
+    return {
+      output: result.output,
+      error: result.error,
+      exitCode: result.exitCode
+    };
   }
 }
 

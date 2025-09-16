@@ -6,9 +6,11 @@ import PackageManagerWindow from "./PackageManagerWindow";
 import NetworkToolsWindow from "./NetworkToolsWindow";
 import SecurityToolsWindow from "./SecurityToolsWindow";
 import BotManagerWindow from "./BotManagerWindow";
-import { Terminal, Globe, Package, Network, Shield, Bot } from "lucide-react";
+import VirtualMachineWindow from "./VirtualMachineWindow";
+import OSLauncherWindow from "./OSLauncherWindow";
+import { Terminal, Globe, Package, Network, Shield, Bot, HardDrive, Zap } from "lucide-react";
 
-export type WindowType = "terminal" | "browser" | "packageManager" | "networkTools" | "securityTools" | "botManager";
+export type WindowType = "terminal" | "browser" | "packageManager" | "networkTools" | "securityTools" | "botManager" | "virtualMachine" | "osLauncher";
 
 export interface WindowItem {
   id: string;
@@ -28,6 +30,8 @@ export interface WindowManagerHandle {
   openNetworkTools: () => void;
   openSecurityTools: () => void;
   openBotManager: () => void;
+  openVirtualMachine: () => void;
+  openOSLauncher: () => void;
   getWindows: () => WindowItem[];
   focusWindow: (id: string) => void;
   minimizeWindow: (id: string) => void;
@@ -88,6 +92,14 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
       const id = `bot-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [...prev, { id, type: "botManager", title: "Bot Manager", icon: <Bot className="w-4 h-4" />, z: ++zCounter.current }]);
     },
+    openVirtualMachine: () => {
+      const id = `vm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      setWindows((prev) => [...prev, { id, type: "virtualMachine", title: "Virtual Machines", icon: <HardDrive className="w-4 h-4" />, z: ++zCounter.current }]);
+    },
+    openOSLauncher: () => {
+      const id = `os-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      setWindows((prev) => [...prev, { id, type: "osLauncher", title: "Hybrid OS Launcher", icon: <Zap className="w-4 h-4" />, z: ++zCounter.current }]);
+    },
     getWindows: () => windows,
     focusWindow: focus,
     minimizeWindow: minimize,
@@ -108,6 +120,14 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
         return <SecurityToolsWindow onClose={() => close(w.id)} />;
       case "botManager":
         return <BotManagerWindow onClose={() => close(w.id)} />;
+      case "virtualMachine":
+        return <VirtualMachineWindow onClose={() => close(w.id)} />;
+      case "osLauncher":
+        return <OSLauncherWindow onClose={() => close(w.id)} onOpenVM={() => {
+          close(w.id);
+          const vmId = `vm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+          setWindows((prev) => [...prev, { id: vmId, type: "virtualMachine", title: "Virtual Machines", icon: <HardDrive className="w-4 h-4" />, z: ++zCounter.current }]);
+        }} />;
       default:
         return (
           <div className="p-4 text-sm text-muted-foreground">
