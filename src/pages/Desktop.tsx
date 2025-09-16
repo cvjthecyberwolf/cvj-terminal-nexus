@@ -104,6 +104,7 @@ const Desktop = () => {
   const [typedSubtitle, setTypedSubtitle] = useState("");
   const [windows, setWindows] = useState<any[]>([]);
   const managerRef = useRef<WindowManagerHandle>(null);
+  const hasAutoOpenedTerminal = useRef(false);
 
   useEffect(() => {
     setSEO();
@@ -140,12 +141,13 @@ const Desktop = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-open Terminal once the intro finishes to ensure immediate accessibility
-  useEffect(() => {
-    if (!showIntro && managerRef.current && !windows.some((w) => w.type === "terminal")) {
-      managerRef.current.openTerminal();
-    }
-  }, [showIntro, windows]);
+// Auto-open Terminal once the intro finishes to ensure immediate accessibility (only once)
+useEffect(() => {
+  if (!showIntro && managerRef.current && !hasAutoOpenedTerminal.current) {
+    hasAutoOpenedTerminal.current = true;
+    managerRef.current.openTerminal();
+  }
+}, [showIntro]);
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden bg-background">
