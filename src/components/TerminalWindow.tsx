@@ -31,8 +31,11 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isInitialized, setIsInitialized] = useState(false);
   const [currentDir, setCurrentDir] = useState("/home/cvj");
+  const [exitConfirm, setExitConfirm] = useState(false);
+  const [exitTimeout, setExitTimeout] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
+  const exitTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
 
   // Initialize the real file system
@@ -104,6 +107,16 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
     initFileSystem();
   }, []);
 
+  // Cleanup exit timer on unmount
+  useEffect(() => {
+    return () => {
+      if (exitTimerRef.current) {
+        clearInterval(exitTimerRef.current);
+        exitTimerRef.current = null;
+      }
+    };
+  }, []);
+
   const addLine = useCallback((text: string, type: 'input' | 'output' | 'error' = 'output') => {
     setLines(prev => [...prev, { text, type }]);
   }, []);
@@ -160,9 +173,31 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
     }
 
     const trimmedCommand = command.trim();
-    if (!trimmedCommand) {
-      console.log('❌ Empty command received');
-      return;
+    if (!trimmedCommand) return;
+    
+    // Handle exit confirmation y/n
+    if (exitConfirm) {
+      if (trimmedCommand.toLowerCase() === 'y') {
+        if (exitTimerRef.current) {
+          clearInterval(exitTimerRef.current);
+          exitTimerRef.current = null;
+        }
+        addLine("Closing terminal...", 'output');
+        if (onClose) setTimeout(() => onClose(), 500);
+        return;
+      } else if (trimmedCommand.toLowerCase() === 'n') {
+        if (exitTimerRef.current) {
+          clearInterval(exitTimerRef.current);
+          exitTimerRef.current = null;
+        }
+        setExitConfirm(false);
+        setExitTimeout(0);
+        addLine("Exit cancelled.", 'output');
+        return;
+      } else {
+        addLine(`⚠️  Please type 'y' to close or 'n' to cancel (${exitTimeout}s remaining)`, 'output');
+        return;
+      }
     }
 
     console.log(`✅ Processing command: ${trimmedCommand}`);
@@ -260,11 +295,31 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
         break;
 
       case 'exit':
-        if (onClose) {
-          addLine("Closing terminal...", 'output');
-          setTimeout(() => onClose(), 500);
-        } else {
-          addLine("Cannot exit: No close callback available", 'error');
+        if (!exitConfirm) {
+          if (onClose) {
+            addLine("⚠️  Are you sure you want to close the terminal?", 'output');
+            addLine("Type 'y' to close or 'n' to cancel (auto-close in 15 seconds)", 'output');
+            setExitConfirm(true);
+            setExitTimeout(15);
+            
+            // Start countdown timer
+            exitTimerRef.current = setInterval(() => {
+              setExitTimeout((prev) => {
+                if (prev <= 1) {
+                  if (exitTimerRef.current) {
+                    clearInterval(exitTimerRef.current);
+                    exitTimerRef.current = null;
+                  }
+                  addLine("⏰ Timeout reached - closing terminal...", 'output');
+                  setTimeout(() => onClose(), 500);
+                  return 0;
+                }
+                return prev - 1;
+              });
+            }, 1000);
+          } else {
+            addLine("Cannot exit: No close callback available", 'error');
+          }
         }
         break;
 
