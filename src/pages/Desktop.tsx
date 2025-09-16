@@ -140,6 +140,13 @@ const Desktop = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Auto-open Terminal once the intro finishes to ensure immediate accessibility
+  useEffect(() => {
+    if (!showIntro && managerRef.current && !windows.some((w) => w.type === "terminal")) {
+      managerRef.current.openTerminal();
+    }
+  }, [showIntro, windows]);
+
   return (
     <div className="min-h-screen w-full relative overflow-hidden bg-background">
       <img
