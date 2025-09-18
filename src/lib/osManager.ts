@@ -1,4 +1,5 @@
 import { AndroidShell, ShellResult } from './nativeShell';
+import { osSimulation } from './osSimulation';
 
 export interface OSInstance {
   id: string;
@@ -188,8 +189,10 @@ export class OSManager {
     instance.bootTime = new Date();
     instance.lastActivity = new Date();
 
-    // Setup virtual environment
+    // Setup virtual environment and network
     await this.setupVirtualEnvironment(instance);
+    const { networkManager } = await import('./networkManager');
+    networkManager.createInstanceNetwork(instance);
 
     return {
       output: `Started ${instance.name} (${instance.type}) on ${instance.architecture}
@@ -266,6 +269,27 @@ ${this.getOSPrompt(instance)}`,
       error: '',
       exitCode: 0
     };
+  }
+
+  async executeCommandInInstance(instanceId: string, command: string, args: string[] = []): Promise<ShellResult> {
+    const instance = this.instances.get(instanceId);
+    if (!instance) {
+      return {
+        output: '',
+        error: `Instance ${instanceId} not found`,
+        exitCode: 1
+      };
+    }
+
+    if (instance.status !== 'running') {
+      return {
+        output: '',
+        error: `Instance ${instance.name} is not running`,
+        exitCode: 1
+      };
+    }
+
+    return await osSimulation.executeCommand(instance, command, args);
   }
 
   async deleteInstance(id: string): Promise<ShellResult> {

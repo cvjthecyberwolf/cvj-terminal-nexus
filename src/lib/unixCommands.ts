@@ -2,6 +2,7 @@ import { fileSystem } from './fileSystem';
 import { AndroidShell } from './nativeShell';
 import { Capacitor } from '@capacitor/core';
 import { osManager } from './osManager';
+import { networkManager } from './networkManager';
 
 export interface CommandResult {
   output: string;
@@ -617,6 +618,165 @@ VM created successfully! Use "vm start ${instance.id}" to boot it.`,
       output: result.output,
       error: result.error,
       exitCode: result.exitCode
+    };
+  }
+
+  // Network commands
+  async ping(args: string[]): Promise<CommandResult> {
+    if (args.length === 0) {
+      return { output: '', error: 'ping: missing destination address', exitCode: 1 };
+    }
+
+    const target = args[0];
+    const result = await networkManager.ping('cvj-host', target);
+    
+    return {
+      output: result.output,
+      error: '',
+      exitCode: result.success ? 0 : 1
+    };
+  }
+
+  async nslookup(args: string[]): Promise<CommandResult> {
+    if (args.length === 0) {
+      return { output: '', error: 'nslookup: missing domain name', exitCode: 1 };
+    }
+
+    const domain = args[0];
+    // Simulate DNS lookup
+    const commonDomains: Record<string, string> = {
+      'google.com': '142.250.191.14',
+      'github.com': '140.82.112.3',
+      'stackoverflow.com': '151.101.1.69',
+      'reddit.com': '151.101.65.140'
+    };
+
+    const ip = commonDomains[domain] || `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+
+    return {
+      output: `Server:		8.8.8.8
+Address:	8.8.8.8#53
+
+Non-authoritative answer:
+Name:	${domain}
+Address: ${ip}`,
+      exitCode: 0
+    };
+  }
+
+  async netstat(args: string[]): Promise<CommandResult> {
+    const connections = networkManager.getActiveConnections();
+    
+    if (connections.length === 0) {
+      return {
+        output: 'Active Internet connections (w/o servers)\nProto Recv-Q Send-Q Local Address           Foreign Address         State',
+        exitCode: 0
+      };
+    }
+
+    const header = 'Proto Recv-Q Send-Q Local Address           Foreign Address         State';
+    const rows = connections.map(conn => {
+      const proto = conn.protocol.toUpperCase().padEnd(5);
+      const recvQ = '0'.padStart(6);
+      const sendQ = '0'.padStart(6);
+      const local = `${conn.sourceInstance}:${conn.sourcePort || 'unknown'}`.padEnd(23);
+      const foreign = `${conn.targetInstance}:${conn.targetPort || 'unknown'}`.padEnd(23);
+      const state = conn.status.toUpperCase();
+      
+      return `${proto} ${recvQ} ${sendQ} ${local} ${foreign} ${state}`;
+    });
+
+    return {
+      output: [header, ...rows].join('\n'),
+      exitCode: 0
+    };
+  }
+
+  async ifconfig(args: string[]): Promise<CommandResult> {
+    const interfaces = networkManager.getInstanceInterfaces('cvj-host');
+    
+    const output = interfaces.map(iface => {
+      const flags = iface.status === 'up' ? 'UP,BROADCAST,RUNNING,MULTICAST' : 'BROADCAST,MULTICAST';
+      return `${iface.name}: flags=4163<${flags}> mtu ${iface.mtu}
+        inet ${iface.ipv4 || 'none'}  netmask 255.255.255.0  broadcast ${iface.ipv4?.replace(/\.\d+$/, '.255') || 'none'}
+        ${iface.ipv6 ? `inet6 ${iface.ipv6}  prefixlen 64  scopeid 0x20<link>` : ''}
+        ether ${iface.mac}  txqueuelen 1000  (Ethernet)
+        ${iface.speed ? `Speed: ${iface.speed}Mbps` : ''}`;
+    }).join('\n\n');
+
+    return { output, exitCode: 0 };
+  }
+
+  async nmap(args: string[]): Promise<CommandResult> {
+    const { securityTools } = await import('./securityTools');
+    
+    if (args.length === 0) {
+      return { output: '', error: 'nmap: missing target specification', exitCode: 1 };
+    }
+
+    const target = args[0];
+    const flags = args.filter(arg => arg.startsWith('-'));
+    const portScan = flags.includes('-p') || flags.includes('--port');
+    const serviceScan = flags.includes('-sV');
+    
+    // Simulate port scanning
+    const commonPorts = [22, 80, 443, 21, 25, 53, 110, 143, 993, 995];
+    const scanResults = [];
+    
+    for (const port of commonPorts) {
+      const result = await networkManager.scanPort('cvj-host', target, port);
+      if (result.open) {
+        const service = serviceScan && result.service ? ` ${result.service}` : '';
+        const version = serviceScan && result.version ? ` ${result.version}` : '';
+        scanResults.push(`${port}/tcp   open ${service}${version}`);
+      }
+    }
+
+    const output = `Starting Nmap scan against ${target}...
+Nmap scan report for ${target}
+Host is up (0.001s latency).
+
+PORT      STATE SERVICE${serviceScan ? ' VERSION' : ''}
+${scanResults.join('\n')}
+
+Nmap done: 1 IP address (1 host up) scanned in 2.34 seconds`;
+
+    // Track tool usage - nmap scan completed
+
+    return { output, exitCode: 0 };
+  }
+
+  async ssh(args: string[]): Promise<CommandResult> {
+    if (args.length === 0) {
+      return { output: '', error: 'ssh: missing destination', exitCode: 1 };
+    }
+
+    const destination = args[0];
+    
+    // Check if it's a VM instance ID
+    const instance = osManager.getInstance(destination);
+    if (instance) {
+      if (instance.status !== 'running') {
+        return {
+          output: '',
+          error: `ssh: VM instance '${destination}' is not running. Start it with: vm start ${destination}`,
+          exitCode: 1
+        };
+      }
+      
+      const result = await osManager.connectToInstance(destination);
+      return {
+        output: result.output,
+        error: result.error,
+        exitCode: result.exitCode
+      };
+    }
+
+    // Simulate SSH connection to external host
+    return {
+      output: `ssh: connect to host ${destination} port 22: Connection refused`,
+      error: '',
+      exitCode: 255
     };
   }
 }
