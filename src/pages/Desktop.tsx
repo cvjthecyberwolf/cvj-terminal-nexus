@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Monitor, Terminal, Home, Shield, Network, Cpu, Bot, Globe, Youtube } from "lucide-react";
+import { Monitor, Terminal, Home, Shield, Network, Cpu, Bot, Globe, Youtube, HardDrive } from "lucide-react";
 import wallpaper from "@/assets/wallpapers/alpha-wolf-cyber-room.jpg";
 import WindowManager, { WindowManagerHandle } from "@/components/desktop/WindowManager";
 import Taskbar from "@/components/desktop/Taskbar";
@@ -261,6 +261,12 @@ useEffect(() => {
           <button type="button" onClick={() => managerRef.current?.openBotManager()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Bot Manager">
             <Bot className="w-4 h-4" /> <span className="hidden sm:inline">Bots</span>
           </button>
+          <button type="button" onClick={() => managerRef.current?.openVirtualMachine()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Virtual Machines">
+            <Monitor className="w-4 h-4" /> <span className="hidden sm:inline">VMs</span>
+          </button>
+          <button type="button" onClick={() => managerRef.current?.openOSLauncher()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open OS Launcher">
+            <HardDrive className="w-4 h-4" /> <span className="hidden sm:inline">OS</span>
+          </button>
         </div>
       </div>
 
@@ -268,6 +274,8 @@ useEffect(() => {
       <ApplicationsMenu
         onOpenTerminal={() => managerRef.current?.openTerminal()}
         onOpenBrowser={(url, title) => managerRef.current?.openBrowser(url, title)}
+        onOpenVirtualMachine={() => managerRef.current?.openVirtualMachine()}
+        onOpenOSLauncher={() => managerRef.current?.openOSLauncher()}
       />
 
       {/* Taskbar */}

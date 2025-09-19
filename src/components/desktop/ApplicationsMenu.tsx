@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Terminal, Globe, Youtube, Menu, X } from "lucide-react";
+import { Terminal, Globe, Youtube, Menu, X, Monitor, HardDrive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ApplicationsMenuProps {
   onOpenTerminal: () => void;
   onOpenBrowser: (url: string, title?: string) => void;
+  onOpenVirtualMachine?: () => void;
+  onOpenOSLauncher?: () => void;
 }
 
 interface AppItem {
@@ -13,7 +15,7 @@ interface AppItem {
   action: () => void;
 }
 
-const ApplicationsMenu = ({ onOpenTerminal, onOpenBrowser }: ApplicationsMenuProps) => {
+const ApplicationsMenu = ({ onOpenTerminal, onOpenBrowser, onOpenVirtualMachine, onOpenOSLauncher }: ApplicationsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const applications: AppItem[] = [
@@ -31,6 +33,16 @@ const ApplicationsMenu = ({ onOpenTerminal, onOpenBrowser }: ApplicationsMenuPro
       name: "YouTube",
       icon: <Youtube className="w-4 h-4" />,
       action: () => onOpenBrowser("https://www.youtube.com", "YouTube"),
+    },
+    {
+      name: "Virtual Machines",
+      icon: <Monitor className="w-4 h-4" />,
+      action: () => onOpenVirtualMachine?.(),
+    },
+    {
+      name: "OS Launcher",
+      icon: <HardDrive className="w-4 h-4" />,
+      action: () => onOpenOSLauncher?.(),
     },
   ];
 
