@@ -5,7 +5,8 @@ const config: CapacitorConfig = {
   appName: 'cvj-terminal-nexus',
   webDir: 'dist',
   server: {
-    url: 'https://1e8f4ab4-324a-4f53-b26e-1b3e6d8dc80d.lovableproject.com?forceHideBadge=true',
+    // Remove URL for production builds - uncomment the line below for development
+    // url: 'https://1e8f4ab4-324a-4f53-b26e-1b3e6d8dc80d.lovableproject.com?forceHideBadge=true',
     cleartext: true
   },
   plugins: {
