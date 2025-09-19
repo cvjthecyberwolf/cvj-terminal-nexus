@@ -33,65 +33,206 @@ export interface OSTemplate {
 export class OSManager {
   private instances: Map<string, OSInstance> = new Map();
   private templates: OSTemplate[] = [
+    // Latest Windows Versions
     {
-      id: 'kali-linux',
-      name: 'Kali Linux',
-      type: 'linux',
-      description: 'Penetration testing and security auditing platform',
-      version: '2024.1',
-      architecture: 'x86_64',
-      diskSize: 4096,
-      minMemory: 1024
-    },
-    {
-      id: 'ubuntu-server',
-      name: 'Ubuntu Server',
-      type: 'linux', 
-      description: 'Popular server distribution',
-      version: '22.04 LTS',
-      architecture: 'x86_64',
-      diskSize: 2048,
-      minMemory: 512
-    },
-    {
-      id: 'alpine-linux',
-      name: 'Alpine Linux',
-      type: 'linux',
-      description: 'Lightweight security-focused distribution',
-      version: '3.19',
-      architecture: 'x86_64',
-      diskSize: 512,
-      minMemory: 256
-    },
-    {
-      id: 'android-x86',
-      name: 'Android x86',
-      type: 'android',
-      description: 'Android for PC platforms',
-      version: '9.0',
-      architecture: 'x86_64',
-      diskSize: 3072,
-      minMemory: 1024
-    },
-    {
-      id: 'windows-10',
-      name: 'Windows 10 LTSC',
+      id: 'windows-13',
+      name: 'Windows 13 Pro',
       type: 'windows',
-      description: 'Windows 10 Long Term Support',
-      version: '2021',
+      description: 'Latest Windows with enhanced AI integration',
+      version: '25398',
+      architecture: 'x86_64',
+      diskSize: 12288,
+      minMemory: 4096
+    },
+    {
+      id: 'windows-11-24h2',
+      name: 'Windows 11 24H2',
+      type: 'windows', 
+      description: 'Windows 11 with latest feature updates',
+      version: '24H2',
+      architecture: 'x86_64',
+      diskSize: 10240,
+      minMemory: 3072
+    },
+    {
+      id: 'windows-server-2025',
+      name: 'Windows Server 2025',
+      type: 'windows',
+      description: 'Latest Windows Server with advanced containerization',
+      version: '2025',
+      architecture: 'x86_64',
+      diskSize: 16384,
+      minMemory: 6144
+    },
+    
+    // Latest Linux Distributions
+    {
+      id: 'blackarch-2024',
+      name: 'BlackArch Linux',
+      type: 'linux',
+      description: 'Penetration testing distribution with 2800+ tools',
+      version: '2024.12.01',
       architecture: 'x86_64',
       diskSize: 8192,
       minMemory: 2048
     },
     {
-      id: 'macos-ventura',
-      name: 'macOS Ventura',
-      type: 'macos',
-      description: 'macOS 13 Virtual Machine',
-      version: '13.0',
+      id: 'kali-rolling',
+      name: 'Kali Linux Rolling',
+      type: 'linux',
+      description: 'Latest Kali with rolling release updates',
+      version: '2024.4',
       architecture: 'x86_64',
       diskSize: 6144,
-      minMemory: 4096
+      minMemory: 2048
+    },
+    {
+      id: 'parrot-os',
+      name: 'Parrot Security OS',
+      type: 'linux',
+      description: 'Security-focused distribution with anonymity tools',
+      version: '6.2',
+      architecture: 'x86_64',
+      diskSize: 5120,
+      minMemory: 1536
+    },
+    {
+      id: 'ubuntu-24-10',
+      name: 'Ubuntu 24.10',
+      type: 'linux',
+      description: 'Latest Ubuntu with enhanced performance',
+      version: '24.10',
+      architecture: 'x86_64',
+      diskSize: 3072,
+      minMemory: 1024
+    },
+    {
+      id: 'arch-rolling',
+      name: 'Arch Linux',
+      type: 'linux',
+      description: 'Bleeding-edge rolling release distribution',
+      version: 'rolling',
+      architecture: 'x86_64',
+      diskSize: 2048,
+      minMemory: 768
+    },
+    {
+      id: 'fedora-40',
+      name: 'Fedora 40',
+      type: 'linux',
+      description: 'Latest Fedora with cutting-edge features',
+      version: '40',
+      architecture: 'x86_64',
+      diskSize: 4096,
+      minMemory: 1536
+    },
+    {
+      id: 'rocky-linux-9',
+      name: 'Rocky Linux 9',
+      type: 'linux',
+      description: 'Enterprise-class Linux distribution',
+      version: '9.5',
+      architecture: 'x86_64',
+      diskSize: 3072,
+      minMemory: 1024
+    },
+    {
+      id: 'alpine-edge',
+      name: 'Alpine Linux Edge',
+      type: 'linux',
+      description: 'Ultra-lightweight security-focused distribution',
+      version: 'edge',
+      architecture: 'x86_64',
+      diskSize: 256,
+      minMemory: 128
+    },
+    
+    // Latest macOS
+    {
+      id: 'macos-sequoia',
+      name: 'macOS Sequoia',
+      type: 'macos',
+      description: 'macOS 15 with enhanced Apple Intelligence',
+      version: '15.1',
+      architecture: 'x86_64',
+      diskSize: 8192,
+      minMemory: 6144
+    },
+    {
+      id: 'macos-sonoma',
+      name: 'macOS Sonoma',
+      type: 'macos',
+      description: 'macOS 14 with interactive widgets',
+      version: '14.7',
+      architecture: 'x86_64',
+      diskSize: 7168,
+      minMemory: 5120
+    },
+    
+    // Latest Mobile/Specialized OS
+    {
+      id: 'android-15',
+      name: 'Android 15',
+      type: 'android',
+      description: 'Android 15 with enhanced privacy controls',
+      version: '15.0',
+      architecture: 'x86_64',
+      diskSize: 4096,
+      minMemory: 2048
+    },
+    {
+      id: 'lineage-21',
+      name: 'LineageOS 21',
+      type: 'android',
+      description: 'Privacy-focused Android distribution',
+      version: '21.0',
+      architecture: 'x86_64',
+      diskSize: 3584,
+      minMemory: 1536
+    },
+    
+    // Specialized Security & Forensics
+    {
+      id: 'caine-12',
+      name: 'CAINE Linux',
+      type: 'linux',
+      description: 'Computer Aided Investigative Environment',
+      version: '12.0',
+      architecture: 'x86_64',
+      diskSize: 4096,
+      minMemory: 1536
+    },
+    {
+      id: 'tsurugi-2024',
+      name: 'TSURUGI Linux',
+      type: 'linux',
+      description: 'DFIR (Digital Forensics and Incident Response)',
+      version: '2024.1',
+      architecture: 'x86_64',
+      diskSize: 6144,
+      minMemory: 2048
+    },
+    
+    // Container & Cloud OS
+    {
+      id: 'talos-linux',
+      name: 'Talos Linux',
+      type: 'linux',
+      description: 'Immutable Kubernetes OS',
+      version: '1.8.1',
+      architecture: 'x86_64',
+      diskSize: 1024,
+      minMemory: 512
+    },
+    {
+      id: 'bottlerocket',
+      name: 'Bottlerocket OS',
+      type: 'linux',
+      description: 'Container-optimized Linux by AWS',
+      version: '1.21.0',
+      architecture: 'x86_64',
+      diskSize: 2048,
+      minMemory: 1024
     }
   ];
 
