@@ -264,6 +264,9 @@ useEffect(() => {
           <button type="button" onClick={() => managerRef.current?.openVirtualMachine()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open Virtual Machines">
             <Monitor className="w-4 h-4" /> <span className="hidden sm:inline">VMs</span>
           </button>
+          <button type="button" onClick={() => managerRef.current?.openRealVirtualMachine()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors bg-primary/20 border border-primary/50" aria-label="Open Real VM Manager">
+            <HardDrive className="w-4 h-4" /> <span className="hidden sm:inline">Real VMs</span>
+          </button>
           <button type="button" onClick={() => managerRef.current?.openOSLauncher()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open OS Launcher">
             <HardDrive className="w-4 h-4" /> <span className="hidden sm:inline">OS</span>
           </button>
@@ -275,6 +278,7 @@ useEffect(() => {
         onOpenTerminal={() => managerRef.current?.openTerminal()}
         onOpenBrowser={(url, title) => managerRef.current?.openBrowser(url, title)}
         onOpenVirtualMachine={() => managerRef.current?.openVirtualMachine()}
+        onOpenRealVirtualMachine={() => managerRef.current?.openRealVirtualMachine()}
         onOpenOSLauncher={() => managerRef.current?.openOSLauncher()}
       />
 

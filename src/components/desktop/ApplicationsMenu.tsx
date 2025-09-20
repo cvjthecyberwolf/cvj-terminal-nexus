@@ -6,6 +6,7 @@ interface ApplicationsMenuProps {
   onOpenTerminal: () => void;
   onOpenBrowser: (url: string, title?: string) => void;
   onOpenVirtualMachine?: () => void;
+  onOpenRealVirtualMachine?: () => void;
   onOpenOSLauncher?: () => void;
 }
 
@@ -15,7 +16,7 @@ interface AppItem {
   action: () => void;
 }
 
-const ApplicationsMenu = ({ onOpenTerminal, onOpenBrowser, onOpenVirtualMachine, onOpenOSLauncher }: ApplicationsMenuProps) => {
+const ApplicationsMenu = ({ onOpenTerminal, onOpenBrowser, onOpenVirtualMachine, onOpenRealVirtualMachine, onOpenOSLauncher }: ApplicationsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const applications: AppItem[] = [
@@ -38,6 +39,11 @@ const ApplicationsMenu = ({ onOpenTerminal, onOpenBrowser, onOpenVirtualMachine,
       name: "Virtual Machines",
       icon: <Monitor className="w-4 h-4" />,
       action: () => onOpenVirtualMachine?.(),
+    },
+    {
+      name: "Real VM Manager",
+      icon: <HardDrive className="w-4 h-4" />,
+      action: () => onOpenRealVirtualMachine?.(),
     },
     {
       name: "OS Launcher",

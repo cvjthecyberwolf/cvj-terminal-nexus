@@ -1,4 +1,4 @@
-import { forwardRef, ReactNode, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { forwardRef, ReactNode, useImperativeHandle, useMemo, useRef, useState, lazy } from "react";
 import DesktopWindow from "./DesktopWindow";
 import TerminalWindow from "@/components/TerminalWindow";
 import BrowserWindow from "./BrowserWindow";
@@ -8,9 +8,9 @@ import SecurityToolsWindow from "./SecurityToolsWindow";
 import BotManagerWindow from "./BotManagerWindow";
 import VirtualMachineWindow from "./VirtualMachineWindow";
 import OSLauncherWindow from "./OSLauncherWindow";
-import { Terminal, Globe, Package, Network, Shield, Bot, HardDrive, Zap } from "lucide-react";
+import { Terminal, Globe, Package, Network, Shield, Bot, HardDrive, Zap, Monitor } from "lucide-react";
 
-export type WindowType = "terminal" | "browser" | "packageManager" | "networkTools" | "securityTools" | "botManager" | "virtualMachine" | "osLauncher";
+export type WindowType = "terminal" | "browser" | "packageManager" | "networkTools" | "securityTools" | "botManager" | "virtualMachine" | "realVirtualMachine" | "osLauncher";
 
 export interface WindowItem {
   id: string;
@@ -31,6 +31,7 @@ export interface WindowManagerHandle {
   openSecurityTools: () => void;
   openBotManager: () => void;
   openVirtualMachine: () => void;
+  openRealVirtualMachine: () => void;
   openOSLauncher: () => void;
   getWindows: () => WindowItem[];
   focusWindow: (id: string) => void;
@@ -96,6 +97,10 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
       const id = `vm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [...prev, { id, type: "virtualMachine", title: "Virtual Machines", icon: <HardDrive className="w-4 h-4" />, z: ++zCounter.current }]);
     },
+    openRealVirtualMachine: () => {
+      const id = `rvm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      setWindows((prev) => [...prev, { id, type: "realVirtualMachine", title: "Real VM Manager", icon: <Monitor className="w-4 h-4" />, z: ++zCounter.current }]);
+    },
     openOSLauncher: () => {
       const id = `os-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [...prev, { id, type: "osLauncher", title: "Hybrid OS Launcher", icon: <Zap className="w-4 h-4" />, z: ++zCounter.current }]);
@@ -122,6 +127,9 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
         return <BotManagerWindow onClose={() => close(w.id)} />;
       case "virtualMachine":
         return <VirtualMachineWindow onClose={() => close(w.id)} />;
+      case "realVirtualMachine":
+        const RealVMWindow = lazy(() => import('./RealVMWindow'));
+        return <RealVMWindow onClose={() => close(w.id)} />;
       case "osLauncher":
         return <OSLauncherWindow onClose={() => close(w.id)} onOpenVM={() => {
           close(w.id);
