@@ -1,4 +1,4 @@
-import { forwardRef, ReactNode, useImperativeHandle, useMemo, useRef, useState, lazy } from "react";
+import { forwardRef, ReactNode, useImperativeHandle, useMemo, useRef, useState, lazy, Suspense } from "react";
 import DesktopWindow from "./DesktopWindow";
 import TerminalWindow from "@/components/TerminalWindow";
 import BrowserWindow from "./BrowserWindow";
@@ -9,6 +9,8 @@ import BotManagerWindow from "./BotManagerWindow";
 import VirtualMachineWindow from "./VirtualMachineWindow";
 import OSLauncherWindow from "./OSLauncherWindow";
 import { Terminal, Globe, Package, Network, Shield, Bot, HardDrive, Zap, Monitor } from "lucide-react";
+
+const RealVMWindow = lazy(() => import('./RealVMWindow'));
 
 export type WindowType = "terminal" | "browser" | "packageManager" | "networkTools" | "securityTools" | "botManager" | "virtualMachine" | "realVirtualMachine" | "osLauncher";
 
@@ -128,8 +130,11 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
       case "virtualMachine":
         return <VirtualMachineWindow onClose={() => close(w.id)} />;
       case "realVirtualMachine":
-        const RealVMWindow = lazy(() => import('./RealVMWindow'));
-        return <RealVMWindow onClose={() => close(w.id)} />;
+        return (
+          <Suspense fallback={<div className="p-4 text-sm">Loading VM Manager...</div>}>
+            <RealVMWindow onClose={() => close(w.id)} />
+          </Suspense>
+        );
       case "osLauncher":
         return <OSLauncherWindow onClose={() => close(w.id)} onOpenVM={() => {
           close(w.id);
