@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Terminal, Globe, Youtube, Menu, X, Monitor, HardDrive } from "lucide-react";
+import { Terminal, Globe, Youtube, Menu, X, Monitor, HardDrive, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ApplicationsMenuProps {
@@ -8,6 +8,7 @@ interface ApplicationsMenuProps {
   onOpenVirtualMachine?: () => void;
   onOpenRealVirtualMachine?: () => void;
   onOpenOSLauncher?: () => void;
+  onOpenCyberJungle?: () => void;
 }
 
 interface AppItem {
@@ -16,7 +17,7 @@ interface AppItem {
   action: () => void;
 }
 
-const ApplicationsMenu = ({ onOpenTerminal, onOpenBrowser, onOpenVirtualMachine, onOpenRealVirtualMachine, onOpenOSLauncher }: ApplicationsMenuProps) => {
+const ApplicationsMenu = ({ onOpenTerminal, onOpenBrowser, onOpenVirtualMachine, onOpenRealVirtualMachine, onOpenOSLauncher, onOpenCyberJungle }: ApplicationsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const applications: AppItem[] = [
@@ -49,6 +50,11 @@ const ApplicationsMenu = ({ onOpenTerminal, onOpenBrowser, onOpenVirtualMachine,
       name: "OS Launcher",
       icon: <HardDrive className="w-4 h-4" />,
       action: () => onOpenOSLauncher?.(),
+    },
+    {
+      name: "Cyber Jungle",
+      icon: <Sparkles className="w-4 h-4" />,
+      action: () => onOpenCyberJungle?.(),
     },
   ];
 

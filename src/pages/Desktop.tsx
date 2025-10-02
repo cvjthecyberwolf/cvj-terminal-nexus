@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Monitor, Terminal, Home, Shield, Network, Cpu, Bot, Globe, Youtube, HardDrive } from "lucide-react";
+import { Monitor, Terminal, Home, Shield, Network, Cpu, Bot, Globe, Youtube, HardDrive, Sparkles } from "lucide-react";
 import wallpaper from "@/assets/wallpapers/alpha-wolf-cyber-room.jpg";
 import WindowManager, { WindowManagerHandle } from "@/components/desktop/WindowManager";
 import Taskbar from "@/components/desktop/Taskbar";
@@ -270,6 +270,9 @@ useEffect(() => {
           <button type="button" onClick={() => managerRef.current?.openOSLauncher()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-primary/10 transition-colors" aria-label="Open OS Launcher">
             <HardDrive className="w-4 h-4" /> <span className="hidden sm:inline">OS</span>
           </button>
+          <button type="button" onClick={() => managerRef.current?.openCyberJungle()} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-primary/20 border border-primary/50 hover:bg-primary/30 transition-colors" aria-label="Open Cyber Jungle">
+            <Sparkles className="w-4 h-4" /> <span className="hidden sm:inline">Cyber Jungle</span>
+          </button>
         </div>
       </div>
 
@@ -280,6 +283,7 @@ useEffect(() => {
         onOpenVirtualMachine={() => managerRef.current?.openVirtualMachine()}
         onOpenRealVirtualMachine={() => managerRef.current?.openRealVirtualMachine()}
         onOpenOSLauncher={() => managerRef.current?.openOSLauncher()}
+        onOpenCyberJungle={() => managerRef.current?.openCyberJungle()}
       />
 
       {/* Taskbar */}

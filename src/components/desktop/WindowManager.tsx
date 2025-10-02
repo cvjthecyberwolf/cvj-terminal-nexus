@@ -8,11 +8,12 @@ import SecurityToolsWindow from "./SecurityToolsWindow";
 import BotManagerWindow from "./BotManagerWindow";
 import VirtualMachineWindow from "./VirtualMachineWindow";
 import OSLauncherWindow from "./OSLauncherWindow";
-import { Terminal, Globe, Package, Network, Shield, Bot, HardDrive, Zap, Monitor } from "lucide-react";
+import CyberJungleWindow from "./CyberJungleWindow";
+import { Terminal, Globe, Package, Network, Shield, Bot, HardDrive, Zap, Monitor, Sparkles } from "lucide-react";
 
 const RealVMWindow = lazy(() => import('./RealVMWindow'));
 
-export type WindowType = "terminal" | "browser" | "packageManager" | "networkTools" | "securityTools" | "botManager" | "virtualMachine" | "realVirtualMachine" | "osLauncher";
+export type WindowType = "terminal" | "browser" | "packageManager" | "networkTools" | "securityTools" | "botManager" | "virtualMachine" | "realVirtualMachine" | "osLauncher" | "cyberJungle";
 
 export interface WindowItem {
   id: string;
@@ -35,6 +36,7 @@ export interface WindowManagerHandle {
   openVirtualMachine: () => void;
   openRealVirtualMachine: () => void;
   openOSLauncher: () => void;
+  openCyberJungle: () => void;
   getWindows: () => WindowItem[];
   focusWindow: (id: string) => void;
   minimizeWindow: (id: string) => void;
@@ -107,6 +109,10 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
       const id = `os-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [...prev, { id, type: "osLauncher", title: "Hybrid OS Launcher", icon: <Zap className="w-4 h-4" />, z: ++zCounter.current }]);
     },
+    openCyberJungle: () => {
+      const id = `cj-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      setWindows((prev) => [...prev, { id, type: "cyberJungle", title: "Cyber Jungle - AI Dev Environment", icon: <Sparkles className="w-4 h-4" />, z: ++zCounter.current }]);
+    },
     getWindows: () => windows,
     focusWindow: focus,
     minimizeWindow: minimize,
@@ -141,6 +147,8 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
           const vmId = `vm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
           setWindows((prev) => [...prev, { id: vmId, type: "virtualMachine", title: "Virtual Machines", icon: <HardDrive className="w-4 h-4" />, z: ++zCounter.current }]);
         }} />;
+      case "cyberJungle":
+        return <CyberJungleWindow onClose={() => close(w.id)} />;
       default:
         return (
           <div className="p-4 text-sm text-muted-foreground">
