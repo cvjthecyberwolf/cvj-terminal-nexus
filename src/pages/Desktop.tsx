@@ -5,6 +5,7 @@ import wallpaper from "@/assets/wallpapers/alpha-wolf-cyber-room.jpg";
 import WindowManager, { WindowManagerHandle } from "@/components/desktop/WindowManager";
 import Taskbar from "@/components/desktop/Taskbar";
 import ApplicationsMenu from "@/components/desktop/ApplicationsMenu";
+import { playCyberMissileSound } from "@/lib/audioEffects";
 
 const setSEO = () => {
   document.title = "CVJ Desktop GUI - Cyber Wolf Terminal";
@@ -108,6 +109,14 @@ const Desktop = () => {
 
   useEffect(() => {
     setSEO();
+  }, []);
+
+  // Play cyber missile sound on desktop launch
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playCyberMissileSound();
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
