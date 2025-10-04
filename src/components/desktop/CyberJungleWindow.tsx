@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Code, Eye, Sparkles } from "lucide-react";
+import { Loader2, Code, Eye, Sparkles, Image, Video, Music } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CyberJungleWindowProps {
   onClose: () => void;
@@ -19,12 +20,14 @@ interface Message {
 const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
   const [prompt, setPrompt] = useState("");
   const [generatedCode, setGeneratedCode] = useState("");
+  const [generatedImage, setGeneratedImage] = useState("");
+  const [generationType, setGenerationType] = useState<'code' | 'image' | 'animation' | 'audio'>('code');
   const [isGenerating, setIsGenerating] = useState(false);
   const [conversation, setConversation] = useState<Message[]>([]);
   const [activeTab, setActiveTab] = useState("prompt");
   const { toast } = useToast();
 
-  const generateCode = async () => {
+  const generate = async () => {
     if (!prompt.trim()) {
       toast({
         title: "Empty Prompt",
@@ -39,7 +42,8 @@ const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
       const { data, error } = await supabase.functions.invoke('cyber-jungle', {
         body: { 
           prompt,
-          conversation: conversation.length > 0 ? conversation : undefined
+          type: generationType,
+          conversation: generationType === 'code' && conversation.length > 0 ? conversation : undefined
         }
       });
 
@@ -49,27 +53,36 @@ const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
         throw new Error(data.error);
       }
 
-      const newConversation: Message[] = [
-        ...conversation,
-        { role: 'user', content: prompt },
-        { role: 'assistant', content: data.code }
-      ];
-      
-      setConversation(newConversation);
-      setGeneratedCode(data.code);
-      setActiveTab("code");
-      
-      toast({
-        title: "Code Generated! 🎉",
-        description: "Your component is ready in the Code tab.",
-      });
+      if (data.type === 'image') {
+        setGeneratedImage(data.content);
+        setActiveTab("preview");
+        toast({
+          title: "Image Generated! 🎉",
+          description: "Your image is ready in the Preview tab.",
+        });
+      } else {
+        const newConversation: Message[] = [
+          ...conversation,
+          { role: 'user', content: prompt },
+          { role: 'assistant', content: data.content }
+        ];
+        
+        setConversation(newConversation);
+        setGeneratedCode(data.content);
+        setActiveTab("code");
+        
+        toast({
+          title: "Code Generated! 🎉",
+          description: "Your component is ready in the Code tab.",
+        });
+      }
       
       setPrompt("");
     } catch (error) {
-      console.error('Error generating code:', error);
+      console.error('Error generating:', error);
       toast({
         title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate code. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate content. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -138,7 +151,7 @@ const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
               <Sparkles className="w-4 h-4" />
               Prompt
             </TabsTrigger>
-            <TabsTrigger value="code" className="gap-2">
+            <TabsTrigger value="code" className="gap-2" disabled={generationType !== 'code'}>
               <Code className="w-4 h-4" />
               Code
             </TabsTrigger>
@@ -152,14 +165,49 @@ const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
                 <Sparkles className="w-5 h-5" />
-                Describe What You Want to Build
+                AI-Powered Creation Studio
               </h3>
               <p className="text-sm text-muted-foreground">
-                Tell Cyber Jungle what you want to create. Be specific about features, design, and functionality.
+                Generate code, images, animations, and audio with AI.
               </p>
             </div>
 
-            {conversation.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Generation Type</label>
+              <Select value={generationType} onValueChange={(v: any) => setGenerationType(v)}>
+                <SelectTrigger className="bg-muted/30">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="code">
+                    <div className="flex items-center gap-2">
+                      <Code className="w-4 h-4" />
+                      React Component
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="image">
+                    <div className="flex items-center gap-2">
+                      <Image className="w-4 h-4" />
+                      Image / Animation
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="audio" disabled>
+                    <div className="flex items-center gap-2">
+                      <Music className="w-4 h-4" />
+                      Audio (Coming Soon)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="animation" disabled>
+                    <div className="flex items-center gap-2">
+                      <Video className="w-4 h-4" />
+                      Video (Coming Soon)
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {conversation.length > 0 && generationType === 'code' && (
               <ScrollArea className="flex-1 border rounded-lg p-3 bg-muted/20">
                 <div className="space-y-3">
                   {conversation.map((msg, idx) => (
@@ -184,24 +232,28 @@ const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
               <Textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Example: Create a todo list app with add, delete, and mark as complete functionality. Make it colorful and modern with smooth animations."
+                placeholder={
+                  generationType === 'code' 
+                    ? "Example: Create a todo list app with add, delete, and mark as complete functionality."
+                    : "Example: A futuristic cyber cityscape at sunset with neon lights"
+                }
                 className="min-h-[120px] resize-none bg-muted/30 border-border"
                 disabled={isGenerating}
               />
               <Button 
-                onClick={generateCode} 
+                onClick={generate} 
                 disabled={isGenerating || !prompt.trim()}
                 className="w-full gap-2"
               >
                 {isGenerating ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Generating Code...
+                    Generating...
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4" />
-                    Generate Code
+                    Generate {generationType === 'code' ? 'Code' : 'Image'}
                   </>
                 )}
               </Button>
@@ -217,14 +269,22 @@ const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
           </TabsContent>
 
           <TabsContent value="preview" className="flex-1 mt-0">
-            {generatedCode ? (
+            {generatedImage ? (
+              <div className="h-full flex items-center justify-center p-4 bg-muted/20">
+                <img 
+                  src={generatedImage} 
+                  alt="Generated content" 
+                  className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                />
+              </div>
+            ) : generatedCode ? (
               renderPreview()
             ) : (
               <div className="h-full flex items-center justify-center text-muted-foreground">
                 <div className="text-center space-y-2">
                   <Eye className="w-12 h-12 mx-auto opacity-20" />
                   <p>No preview available yet.</p>
-                  <p className="text-sm">Generate some code first!</p>
+                  <p className="text-sm">Generate some content first!</p>
                 </div>
               </div>
             )}
