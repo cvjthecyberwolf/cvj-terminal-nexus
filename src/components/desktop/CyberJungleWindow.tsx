@@ -97,25 +97,51 @@ const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
     const codeMatch = generatedCode.match(/```(?:tsx|typescript|javascript|jsx)?\n([\s\S]*?)```/);
     const code = codeMatch ? codeMatch[1] : generatedCode;
 
+    // Clean up the code - remove export default if it's there since we'll handle it
+    const cleanCode = code
+      .replace(/export\s+default\s+function\s+App/g, 'function App')
+      .replace(/export\s+default\s+App/g, '');
+
     return (
       <iframe
         className="w-full h-full border-0 bg-background"
+        sandbox="allow-scripts"
         srcDoc={`
           <!DOCTYPE html>
           <html>
             <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <script type="importmap">
                 {
                   "imports": {
                     "react": "https://esm.sh/react@18.3.1",
                     "react-dom": "https://esm.sh/react-dom@18.3.1",
-                    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client"
+                    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+                    "react/": "https://esm.sh/react@18.3.1/"
                   }
                 }
               </script>
               <script src="https://cdn.tailwindcss.com"></script>
               <style>
-                body { margin: 0; padding: 20px; font-family: system-ui, -apple-system, sans-serif; }
+                * { box-sizing: border-box; }
+                body { 
+                  margin: 0; 
+                  padding: 0; 
+                  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                  overflow-x: hidden;
+                }
+                #root { min-height: 100vh; }
+                .error-display {
+                  padding: 20px;
+                  margin: 20px;
+                  background: #fee;
+                  border: 2px solid #f00;
+                  border-radius: 8px;
+                  color: #c00;
+                  font-family: monospace;
+                  white-space: pre-wrap;
+                }
               </style>
             </head>
             <body>
@@ -124,15 +150,53 @@ const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
                 import React from 'react';
                 import ReactDOM from 'react-dom/client';
                 
+                // Error boundary wrapper
+                class ErrorBoundary extends React.Component {
+                  constructor(props) {
+                    super(props);
+                    this.state = { hasError: false, error: null };
+                  }
+                  
+                  static getDerivedStateFromError(error) {
+                    return { hasError: true, error };
+                  }
+                  
+                  render() {
+                    if (this.state.hasError) {
+                      return React.createElement('div', { className: 'error-display' },
+                        'Runtime Error:\\n' + this.state.error.message
+                      );
+                    }
+                    return this.props.children;
+                  }
+                }
+                
                 try {
-                  ${code}
+                  ${cleanCode}
+                  
+                  if (typeof App === 'undefined') {
+                    throw new Error('Component "App" not found. Make sure to export a function named App.');
+                  }
                   
                   const root = ReactDOM.createRoot(document.getElementById('root'));
-                  root.render(React.createElement(App || Component || (() => React.createElement('div', null, 'Component rendered successfully!'))));
+                  root.render(
+                    React.createElement(ErrorBoundary, null,
+                      React.createElement(App)
+                    )
+                  );
                 } catch (error) {
-                  document.getElementById('root').innerHTML = '<div style="color: red; padding: 20px;">Error: ' + error.message + '</div>';
-                  console.error(error);
+                  console.error('Preview Error:', error);
+                  document.getElementById('root').innerHTML = 
+                    '<div class="error-display">Compilation Error:\\n' + error.message + '</div>';
                 }
+                
+                // Capture runtime errors
+                window.onerror = function(msg, url, line, col, error) {
+                  const errorMsg = error ? error.stack : msg;
+                  document.getElementById('root').innerHTML = 
+                    '<div class="error-display">Runtime Error:\\n' + errorMsg + '</div>';
+                  return true;
+                };
               </script>
             </body>
           </html>
