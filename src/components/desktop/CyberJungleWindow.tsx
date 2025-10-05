@@ -38,44 +38,106 @@ const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
     }
 
     setIsGenerating(true);
+    
     try {
-      const { data, error } = await supabase.functions.invoke('cyber-jungle', {
-        body: { 
-          prompt,
-          type: generationType,
-          conversation: generationType === 'code' && conversation.length > 0 ? conversation : undefined
-        }
-      });
+      // Handle image generation (non-streaming)
+      if (generationType === 'image') {
+        const { data, error } = await supabase.functions.invoke('cyber-jungle', {
+          body: { 
+            prompt,
+            type: generationType,
+          }
+        });
 
-      if (error) throw error;
+        if (error) throw error;
+        if (data.error) throw new Error(data.error);
 
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      if (data.type === 'image') {
         setGeneratedImage(data.content);
         setActiveTab("preview");
         toast({
           title: "Image Generated! 🎉",
           description: "Your image is ready in the Preview tab.",
         });
-      } else {
-        const newConversation: Message[] = [
-          ...conversation,
-          { role: 'user', content: prompt },
-          { role: 'assistant', content: data.content }
-        ];
-        
-        setConversation(newConversation);
-        setGeneratedCode(data.content);
-        setActiveTab("code");
-        
-        toast({
-          title: "Code Generated! 🎉",
-          description: "Your component is ready in the Code tab.",
-        });
+        setPrompt("");
+        setIsGenerating(false);
+        return;
       }
+
+      // Handle code generation with streaming
+      const projectId = 'qfnxzwxnuemecadfogbj';
+      const functionUrl = `https://${projectId}.supabase.co/functions/v1/cyber-jungle`;
+      
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbnh6d3hudWVtZWNhZGZvZ2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NDc4MzEsImV4cCI6MjA2ODUyMzgzMX0.SeaAv2BwMGliVMPKsCBzyRJEcHYuuRLPKNuROWY0ouw'}`
+        },
+        body: JSON.stringify({
+          prompt,
+          type: generationType,
+          conversation: conversation.length > 0 ? conversation : undefined
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to start generation');
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedContent = '';
+      let textBuffer = '';
+
+      setGeneratedCode('');
+      setActiveTab("code");
+
+      while (reader) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        textBuffer += decoder.decode(value, { stream: true });
+        
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            
+            if (content) {
+              accumulatedContent += content;
+              setGeneratedCode(accumulatedContent);
+            }
+          } catch (e) {
+            // Incomplete JSON, will get completed in next chunk
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
+
+      const newConversation: Message[] = [
+        ...conversation,
+        { role: 'user', content: prompt },
+        { role: 'assistant', content: accumulatedContent }
+      ];
+      
+      setConversation(newConversation);
+      
+      toast({
+        title: "Code Generated! 🎉",
+        description: "Your component is ready in the Code tab.",
+      });
       
       setPrompt("");
     } catch (error) {

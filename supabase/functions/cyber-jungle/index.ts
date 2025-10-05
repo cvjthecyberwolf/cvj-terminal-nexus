@@ -69,7 +69,7 @@ serve(async (req) => {
       );
     }
 
-    // Handle code generation
+    // Handle code generation with streaming
     const messages = [
       {
         role: 'system',
@@ -133,6 +133,7 @@ IMPORTANT:
         messages,
         temperature: 0.7,
         max_tokens: 4096,
+        stream: true, // Enable streaming
       }),
     });
 
@@ -154,15 +155,17 @@ IMPORTANT:
       throw new Error('AI Gateway error');
     }
 
-    const data = await response.json();
-    const generatedCode = data.choices[0].message.content;
+    console.log('Streaming code generation...');
 
-    console.log('Generated code successfully');
-
-    return new Response(
-      JSON.stringify({ type: 'code', content: generatedCode }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    // Return the streaming response directly
+    return new Response(response.body, {
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      }
+    });
 
   } catch (error) {
     console.error('Error in cyber-jungle function:', error);
