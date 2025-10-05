@@ -25,7 +25,38 @@ const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [conversation, setConversation] = useState<Message[]>([]);
   const [activeTab, setActiveTab] = useState("prompt");
+  const [detectedLanguage, setDetectedLanguage] = useState<string>('react');
   const { toast } = useToast();
+
+  const detectLanguage = (promptText: string): string => {
+    const lowerPrompt = promptText.toLowerCase();
+    const languageKeywords: Record<string, string[]> = {
+      python: ['python', 'py', 'django', 'flask', 'pandas', 'numpy'],
+      javascript: ['javascript', 'js', 'node', 'nodejs'],
+      typescript: ['typescript', 'ts'],
+      java: ['java'],
+      csharp: ['c#', 'csharp', 'dotnet', '.net'],
+      cpp: ['c++', 'cpp'],
+      rust: ['rust'],
+      go: ['golang', 'go'],
+      ruby: ['ruby', 'rails'],
+      php: ['php', 'laravel'],
+      swift: ['swift', 'ios'],
+      kotlin: ['kotlin', 'android'],
+      sql: ['sql', 'mysql', 'postgres', 'database query'],
+      html: ['html'],
+      css: ['css', 'sass', 'scss'],
+      bash: ['bash', 'shell', 'script'],
+    };
+
+    for (const [lang, keywords] of Object.entries(languageKeywords)) {
+      if (keywords.some(keyword => lowerPrompt.includes(keyword))) {
+        return lang;
+      }
+    }
+
+    return 'react'; // default to React
+  };
 
   const generate = async () => {
     if (!prompt.trim()) {
@@ -38,6 +69,10 @@ const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
     }
 
     setIsGenerating(true);
+    
+    // Detect language from prompt
+    const language = detectLanguage(prompt);
+    setDetectedLanguage(language);
     
     try {
       // Handle image generation (non-streaming)
@@ -76,6 +111,7 @@ const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
         body: JSON.stringify({
           prompt,
           type: generationType,
+          language,
           conversation: conversation.length > 0 ? conversation : undefined
         })
       });
@@ -154,6 +190,22 @@ const CyberJungleWindow = ({ onClose }: CyberJungleWindowProps) => {
 
   const renderPreview = () => {
     if (!generatedCode) return null;
+
+    const isReactLang = detectedLanguage === 'react' || detectedLanguage === 'tsx' || detectedLanguage === 'jsx' || detectedLanguage === 'javascript' || detectedLanguage === 'typescript';
+
+    // For non-React languages, just show the code
+    if (!isReactLang) {
+      return (
+        <div className="h-full overflow-auto p-4 bg-slate-950">
+          <div className="bg-slate-900 text-green-400 p-6 rounded-lg font-mono text-sm border border-green-500/20">
+            <div className="mb-3 text-cyan-400 font-bold text-xs uppercase tracking-wide">
+              {detectedLanguage.toUpperCase()} Code
+            </div>
+            <pre className="whitespace-pre-wrap overflow-x-auto">{generatedCode}</pre>
+          </div>
+        </div>
+      );
+    }
 
     // Extract code from markdown code blocks
     const codeMatch = generatedCode.match(/```(?:tsx|typescript|javascript|jsx)?\n([\s\S]*?)```/);

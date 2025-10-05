@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, conversation, type = 'code' } = await req.json();
+    const { prompt, conversation, type = 'code', language } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {
@@ -70,10 +70,10 @@ serve(async (req) => {
     }
 
     // Handle code generation with streaming
-    const messages = [
-      {
-        role: 'system',
-        content: `You are Cyber Jungle, an AI-powered no-code development environment. Generate complete, working, self-contained React components.
+    const isReactRequest = !language || language.toLowerCase() === 'react' || language.toLowerCase() === 'tsx' || language.toLowerCase() === 'jsx';
+    
+    const systemContent = isReactRequest 
+      ? `You are Cyber Jungle, an AI-powered no-code development environment. Generate complete, working, self-contained React components.
 
 CRITICAL RULES:
 1. Generate COMPLETE, EXECUTABLE code that runs immediately
@@ -117,6 +117,33 @@ IMPORTANT:
 - NO mock data unless it's part of the demo
 - Everything must WORK and be BEAUTIFUL
 - Test that syntax is valid before responding`
+      : `You are Cyber Jungle, an AI-powered code generation assistant. Generate complete, working code in ${language || 'the requested language'}.
+
+CRITICAL RULES:
+1. Generate COMPLETE, EXECUTABLE code that runs immediately
+2. Include ALL necessary imports and dependencies
+3. Add clear comments explaining the code
+4. Include proper error handling
+5. Make the code production-ready
+6. Follow best practices for ${language || 'the language'}
+
+REQUIRED FORMAT:
+\`\`\`${language || 'code'}
+// Complete, working code here
+// Include all necessary imports, functions, and logic
+\`\`\`
+
+IMPORTANT:
+- NO placeholder comments like "// Add more features"
+- NO incomplete functions
+- Everything must WORK correctly
+- Test that syntax is valid before responding
+- Include example usage if applicable`;
+
+    const messages = [
+      {
+        role: 'system',
+        content: systemContent
       },
       ...(conversation || []),
       { role: 'user', content: prompt }
