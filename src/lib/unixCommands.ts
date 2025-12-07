@@ -1,5 +1,5 @@
 import { fileSystem } from './fileSystem';
-import { AndroidShell } from './nativeShell';
+import { AndroidShell, FileInfo } from './nativeShell';
 import { Capacitor } from '@capacitor/core';
 import { osManager } from './osManager';
 import { networkManager } from './networkManager';
@@ -10,9 +10,10 @@ export interface CommandResult {
   exitCode: number;
 }
 
-// Real Unix command implementations
+// Real Unix command implementations with native Android integration
 export class UnixCommands {
   private currentUser = 'cvj';
+  private nativeCurrentDir: string = '/home/cvj';
   private environment: Record<string, string> = {
     PATH: '/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin',
     HOME: '/home/cvj',
@@ -22,22 +23,67 @@ export class UnixCommands {
     LANG: 'en_US.UTF-8',
   };
 
+  private isNative(): boolean {
+    return Capacitor.isNativePlatform();
+  }
+
+  private formatFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes.toString();
+    if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + 'K';
+    if (bytes < 1024 * 1024 * 1024) return Math.round(bytes / (1024 * 1024)) + 'M';
+    return Math.round(bytes / (1024 * 1024 * 1024)) + 'G';
+  }
+
+  private formatPermissions(file: FileInfo): string {
+    const type = file.isDirectory ? 'd' : '-';
+    const r = file.readable ? 'r' : '-';
+    const w = file.writable ? 'w' : '-';
+    const x = file.executable ? 'x' : '-';
+    return `${type}${r}${w}${x}${r}-${x}${r}-${x}`;
+  }
+
   async ls(args: string[] = []): Promise<CommandResult> {
-    // Use native shell when available, otherwise fall back to simulation
-    if (Capacitor.isNativePlatform()) {
-      return await AndroidShell.executeCommand('ls', args);
+    const flags = args.filter(arg => arg.startsWith('-'));
+    const paths = args.filter(arg => !arg.startsWith('-'));
+    const targetPath = paths[0] || '.';
+    const showAll = flags.some(f => f.includes('a'));
+    const longFormat = flags.some(f => f.includes('l'));
+    const humanReadable = flags.some(f => f.includes('h'));
+
+    // Use native shell when available
+    if (this.isNative()) {
+      try {
+        const result = await AndroidShell.listDirectory(targetPath === '.' ? undefined : targetPath);
+        
+        if (result.error) {
+          return { output: '', error: `ls: ${result.error}`, exitCode: 1 };
+        }
+
+        let files = result.files;
+        if (!showAll) {
+          files = files.filter(f => !f.name.startsWith('.'));
+        }
+
+        if (longFormat) {
+          const output = files.map(file => {
+            const perms = this.formatPermissions(file);
+            const size = humanReadable ? this.formatFileSize(file.size) : file.size.toString().padStart(8);
+            const date = file.modified.split(' ').slice(0, 2).join(' ');
+            return `${perms} 1 ${this.currentUser} ${this.currentUser} ${size} ${date} ${file.name}`;
+          }).join('\n');
+          return { output: output || '', exitCode: 0 };
+        } else {
+          const output = files.map(f => f.name).join('  ');
+          return { output, exitCode: 0 };
+        }
+      } catch (error) {
+        return { output: '', error: `ls: ${error instanceof Error ? error.message : 'Unknown error'}`, exitCode: 1 };
+      }
     }
     
     // Web fallback - existing simulation code
     try {
-      const flags = args.filter(arg => arg.startsWith('-'));
-      const paths = args.filter(arg => !arg.startsWith('-'));
-      const targetPath = paths[0] || '.';
-
       const files = await fileSystem.listDirectory(targetPath);
-      const showAll = flags.some(f => f.includes('a'));
-      const longFormat = flags.some(f => f.includes('l'));
-
       let filteredFiles = showAll ? files : files.filter(f => !f.name.startsWith('.'));
 
       if (longFormat) {
@@ -57,12 +103,36 @@ export class UnixCommands {
   }
 
   async pwd(): Promise<CommandResult> {
+    if (this.isNative()) {
+      try {
+        const result = await AndroidShell.getCurrentDirectory();
+        this.nativeCurrentDir = result.path;
+        return { output: result.path, exitCode: 0 };
+      } catch (error) {
+        return { output: this.nativeCurrentDir, exitCode: 0 };
+      }
+    }
     return { output: fileSystem.getCurrentDirectory(), exitCode: 0 };
   }
 
   async cd(args: string[]): Promise<CommandResult> {
+    const path = args[0] || this.environment.HOME;
+
+    if (this.isNative()) {
+      try {
+        const result = await AndroidShell.changeDirectory(path);
+        if (result) {
+          this.nativeCurrentDir = result.path;
+          this.environment.PWD = result.path;
+          return { output: '', exitCode: 0 };
+        }
+        return { output: '', error: `cd: ${path}: No such file or directory`, exitCode: 1 };
+      } catch (error) {
+        return { output: '', error: `cd: ${error instanceof Error ? error.message : 'Unknown error'}`, exitCode: 1 };
+      }
+    }
+
     try {
-      const path = args[0] || this.environment.HOME;
       const newPath = fileSystem.changeDirectory(path);
       this.environment.PWD = newPath;
       return { output: '', exitCode: 0 };
@@ -74,6 +144,23 @@ export class UnixCommands {
   async cat(args: string[]): Promise<CommandResult> {
     if (args.length === 0) {
       return { output: '', error: 'cat: missing file operand', exitCode: 1 };
+    }
+
+    if (this.isNative()) {
+      try {
+        const results: string[] = [];
+        for (const file of args) {
+          const result = await AndroidShell.readFile(file);
+          if (result) {
+            results.push(result.content);
+          } else {
+            return { output: '', error: `cat: ${file}: No such file or directory`, exitCode: 1 };
+          }
+        }
+        return { output: results.join('\n'), exitCode: 0 };
+      } catch (error) {
+        return { output: '', error: `cat: ${error instanceof Error ? error.message : 'Unknown error'}`, exitCode: 1 };
+      }
     }
 
     try {
@@ -100,8 +187,26 @@ export class UnixCommands {
       return { output: '', error: 'mkdir: missing operand', exitCode: 1 };
     }
 
+    const flags = args.filter(arg => arg.startsWith('-'));
+    const dirs = args.filter(arg => !arg.startsWith('-'));
+    const recursive = flags.some(f => f.includes('p'));
+
+    if (this.isNative()) {
+      try {
+        for (const dir of dirs) {
+          const result = await AndroidShell.createDirectory(dir, recursive);
+          if (!result.success) {
+            return { output: '', error: `mkdir: cannot create directory '${dir}'`, exitCode: 1 };
+          }
+        }
+        return { output: '', exitCode: 0 };
+      } catch (error) {
+        return { output: '', error: `mkdir: ${error instanceof Error ? error.message : 'Unknown error'}`, exitCode: 1 };
+      }
+    }
+
     try {
-      for (const dir of args) {
+      for (const dir of dirs) {
         await fileSystem.createDirectory(dir);
       }
       return { output: '', exitCode: 0 };
@@ -115,10 +220,29 @@ export class UnixCommands {
       return { output: '', error: 'rm: missing operand', exitCode: 1 };
     }
 
+    const flags = args.filter(arg => arg.startsWith('-'));
+    const files = args.filter(arg => !arg.startsWith('-'));
+    const recursive = flags.some(f => f.includes('r') || f.includes('R'));
+    const force = flags.some(f => f.includes('f'));
+
+    if (this.isNative()) {
+      try {
+        for (const file of files) {
+          const result = await AndroidShell.deleteFile(file, recursive);
+          if (!result.success && !force) {
+            return { output: '', error: `rm: cannot remove '${file}'`, exitCode: 1 };
+          }
+        }
+        return { output: '', exitCode: 0 };
+      } catch (error) {
+        if (!force) {
+          return { output: '', error: `rm: ${error instanceof Error ? error.message : 'Unknown error'}`, exitCode: 1 };
+        }
+        return { output: '', exitCode: 0 };
+      }
+    }
+
     try {
-      const flags = args.filter(arg => arg.startsWith('-'));
-      const files = args.filter(arg => !arg.startsWith('-'));
-      
       for (const file of files) {
         await fileSystem.deleteFile(file);
       }
@@ -128,20 +252,83 @@ export class UnixCommands {
     }
   }
 
+  async cp(args: string[]): Promise<CommandResult> {
+    if (args.length < 2) {
+      return { output: '', error: 'cp: missing file operand', exitCode: 1 };
+    }
+
+    const flags = args.filter(arg => arg.startsWith('-'));
+    const paths = args.filter(arg => !arg.startsWith('-'));
+    const source = paths[0];
+    const destination = paths[1];
+
+    if (this.isNative()) {
+      try {
+        const result = await AndroidShell.copyFile(source, destination);
+        if (!result.success) {
+          return { output: '', error: `cp: cannot copy '${source}' to '${destination}'`, exitCode: 1 };
+        }
+        return { output: '', exitCode: 0 };
+      } catch (error) {
+        return { output: '', error: `cp: ${error instanceof Error ? error.message : 'Unknown error'}`, exitCode: 1 };
+      }
+    }
+
+    return { output: '', error: 'cp: not supported in web mode', exitCode: 1 };
+  }
+
+  async mv(args: string[]): Promise<CommandResult> {
+    if (args.length < 2) {
+      return { output: '', error: 'mv: missing file operand', exitCode: 1 };
+    }
+
+    const paths = args.filter(arg => !arg.startsWith('-'));
+    const source = paths[0];
+    const destination = paths[1];
+
+    if (this.isNative()) {
+      try {
+        const result = await AndroidShell.moveFile(source, destination);
+        if (!result.success) {
+          return { output: '', error: `mv: cannot move '${source}' to '${destination}'`, exitCode: 1 };
+        }
+        return { output: '', exitCode: 0 };
+      } catch (error) {
+        return { output: '', error: `mv: ${error instanceof Error ? error.message : 'Unknown error'}`, exitCode: 1 };
+      }
+    }
+
+    return { output: '', error: 'mv: not supported in web mode', exitCode: 1 };
+  }
+
   async grep(args: string[]): Promise<CommandResult> {
     if (args.length < 2) {
       return { output: '', error: 'grep: usage: grep pattern file', exitCode: 1 };
     }
 
+    const pattern = args[0];
+    const filename = args[1];
+
+    if (this.isNative()) {
+      try {
+        const result = await AndroidShell.readFile(filename);
+        if (result) {
+          const lines = result.content.split('\n');
+          const regex = new RegExp(pattern, 'g');
+          const matches = lines.filter(line => regex.test(line));
+          return { output: matches.join('\n'), exitCode: matches.length > 0 ? 0 : 1 };
+        }
+        return { output: '', error: `grep: ${filename}: No such file or directory`, exitCode: 2 };
+      } catch (error) {
+        return { output: '', error: `grep: ${error instanceof Error ? error.message : 'Unknown error'}`, exitCode: 2 };
+      }
+    }
+
     try {
-      const pattern = args[0];
-      const filename = args[1];
       const content = await fileSystem.readTextFile(filename);
       const lines = content.split('\n');
-      
       const regex = new RegExp(pattern, 'g');
       const matches = lines.filter(line => regex.test(line));
-      
       return { output: matches.join('\n'), exitCode: 0 };
     } catch (error) {
       return { output: '', error: `grep: ${error instanceof Error ? error.message : 'Unknown error'}`, exitCode: 1 };
@@ -153,10 +340,22 @@ export class UnixCommands {
       return { output: '', error: 'wget: missing URL', exitCode: 1 };
     }
 
+    const url = args[0];
+    const filename = args.find(arg => arg.startsWith('-O'))?.split('=')[1] || url.split('/').pop() || 'index.html';
+
+    if (this.isNative()) {
+      try {
+        const result = await AndroidShell.downloadFile(url, filename);
+        if (result.exitCode === 0) {
+          return { output: `'${filename}' saved [${result.size || 0}]`, exitCode: 0 };
+        }
+        return { output: '', error: result.error || 'Download failed', exitCode: 1 };
+      } catch (error) {
+        return { output: '', error: `wget: ${error instanceof Error ? error.message : 'Unknown error'}`, exitCode: 1 };
+      }
+    }
+
     try {
-      const url = args[0];
-      const filename = args.find(arg => arg.startsWith('-O'))?.split('=')[1] || url.split('/').pop() || 'index.html';
-      
       await fileSystem.downloadFromUrl(url, filename);
       return { output: `${filename} saved`, exitCode: 0 };
     } catch (error) {
@@ -167,6 +366,17 @@ export class UnixCommands {
   async touch(args: string[]): Promise<CommandResult> {
     if (args.length === 0) {
       return { output: '', error: 'touch: missing file operand', exitCode: 1 };
+    }
+
+    if (this.isNative()) {
+      try {
+        for (const file of args) {
+          await AndroidShell.writeFile(file, '', false);
+        }
+        return { output: '', exitCode: 0 };
+      } catch (error) {
+        return { output: '', error: `touch: ${error instanceof Error ? error.message : 'Unknown error'}`, exitCode: 1 };
+      }
     }
 
     try {
@@ -185,6 +395,23 @@ export class UnixCommands {
   async uname(args: string[]): Promise<CommandResult> {
     const flags = args.filter(arg => arg.startsWith('-'));
     const all = flags.some(f => f.includes('a'));
+
+    if (this.isNative()) {
+      try {
+        const info = await AndroidShell.getSystemInfo();
+        if (info) {
+          if (all) {
+            return { 
+              output: `Linux ${info.device} ${info.androidVersion} #1 SMP ${info.supportedAbis} Android`, 
+              exitCode: 0 
+            };
+          }
+          return { output: 'Linux', exitCode: 0 };
+        }
+      } catch (error) {
+        // Fall through to default
+      }
+    }
     
     if (all) {
       return { 
@@ -204,6 +431,10 @@ export class UnixCommands {
   }
 
   async ps(args: string[]): Promise<CommandResult> {
+    if (this.isNative()) {
+      return await AndroidShell.executeCommand('ps', args);
+    }
+    
     const processes = [
       'PID TTY          TIME CMD',
       '  1 ?        00:00:01 systemd',
@@ -215,6 +446,38 @@ export class UnixCommands {
   }
 
   async df(args: string[]): Promise<CommandResult> {
+    const humanReadable = args.some(f => f.includes('h'));
+
+    if (this.isNative()) {
+      try {
+        const storage = await AndroidShell.getStorageInfo();
+        if (storage) {
+          const formatSize = (bytes: number) => {
+            if (humanReadable) {
+              return this.formatFileSize(bytes);
+            }
+            return Math.round(bytes / 1024).toString();
+          };
+
+          const lines = ['Filesystem     Size   Used  Avail Use% Mounted on'];
+          
+          if (storage.internal) {
+            const usePct = Math.round((storage.internal.used / storage.internal.total) * 100);
+            lines.push(`/dev/block/data  ${formatSize(storage.internal.total)}  ${formatSize(storage.internal.used)}  ${formatSize(storage.internal.free)}  ${usePct}% /data`);
+          }
+          
+          if (storage.external) {
+            const usePct = Math.round((storage.external.used / storage.external.total) * 100);
+            lines.push(`/dev/block/sdcard  ${formatSize(storage.external.total)}  ${formatSize(storage.external.used)}  ${formatSize(storage.external.free)}  ${usePct}% /sdcard`);
+          }
+          
+          return { output: lines.join('\n'), exitCode: 0 };
+        }
+      } catch (error) {
+        // Fall through to default
+      }
+    }
+
     const output = `Filesystem     1K-blocks    Used Available Use% Mounted on
 /dev/sda1       20971520 8388608  12582912  41% /
 tmpfs            2097152       0   2097152   0% /dev/shm
@@ -223,6 +486,28 @@ tmpfs            2097152    1024   2096128   1% /run`;
   }
 
   async free(args: string[]): Promise<CommandResult> {
+    const humanReadable = args.some(f => f.includes('h'));
+
+    if (this.isNative()) {
+      try {
+        const info = await AndroidShell.getSystemInfo();
+        if (info) {
+          const formatMem = (bytes: number) => {
+            if (humanReadable) {
+              return this.formatFileSize(bytes);
+            }
+            return Math.round(bytes / 1024).toString();
+          };
+
+          const output = `               total        used        free      shared  buff/cache   available
+Mem:        ${formatMem(info.totalMemory).padStart(8)}  ${formatMem(info.totalMemory - info.freeMemory).padStart(8)}  ${formatMem(info.freeMemory).padStart(8)}           0           0  ${formatMem(info.maxMemory).padStart(8)}`;
+          return { output, exitCode: 0 };
+        }
+      } catch (error) {
+        // Fall through to default
+      }
+    }
+
     const output = `               total        used        free      shared  buff/cache   available
 Mem:         4194304     1048576     2097152           0     1048576     3145728
 Swap:        2097152           0     2097152`;
