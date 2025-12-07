@@ -107,16 +107,24 @@ ANSI_COLOR="1;31"`));
 kali:x:1000:1000:Kali,,,:/home/kali:/bin/bash`));
   }
 
-  async writeFile(path: string, content: ArrayBuffer): Promise<void> {
+  async writeFile(path: string, content: ArrayBuffer | Uint8Array): Promise<void> {
     if (!this.db) throw new Error('File system not initialized');
 
+    let buffer: ArrayBuffer;
+    if (content instanceof Uint8Array) {
+      buffer = new ArrayBuffer(content.byteLength);
+      new Uint8Array(buffer).set(content);
+    } else {
+      buffer = content;
+    }
+    
     const now = new Date();
     await this.db.put('files', {
       path: this.resolvePath(path),
-      content,
+      content: buffer,
       type: 'file',
       permissions: '-rw-r--r--',
-      size: content.byteLength,
+      size: buffer.byteLength,
       created: now,
       modified: now,
       parent: path.substring(0, path.lastIndexOf('/')) || '/',
