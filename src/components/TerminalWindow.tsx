@@ -131,13 +131,21 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
       case 'cd': 
         const result = await unixCommands.cd(args);
         if (result.exitCode === 0) {
-          setCurrentDir(fileSystem.getCurrentDirectory());
+          // Update current dir from native or virtual FS
+          if (Capacitor.isNativePlatform()) {
+            const dirResult = await AndroidShell.getCurrentDirectory();
+            setCurrentDir(dirResult.path);
+          } else {
+            setCurrentDir(fileSystem.getCurrentDirectory());
+          }
         }
         return result;
       case 'cat': return await unixCommands.cat(args);
       case 'echo': return await unixCommands.echo(args);
       case 'mkdir': return await unixCommands.mkdir(args);
       case 'rm': return await unixCommands.rm(args);
+      case 'cp': return await unixCommands.cp(args);
+      case 'mv': return await unixCommands.mv(args);
       case 'grep': return await unixCommands.grep(args);
       case 'wget': return await unixCommands.wget(args);
       case 'touch': return await unixCommands.touch(args);
@@ -405,6 +413,8 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
           if (args.length === 0) {
             addLine("CVJ Setup - Usage:", 'output');
             addLine("  cvj-setup storage      - Grant storage accessibility permissions", 'output');
+            addLine("  cvj-setup linux        - Setup Linux environment", 'output');
+            addLine("  cvj-setup info         - Show system information", 'output');
             break;
           }
 
@@ -414,16 +424,70 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
               try {
                 addLine("🔧 Setting up storage access permissions...", 'output');
                 if (Capacitor.isNativePlatform()) {
-                  // On native platform, this would request actual storage permissions
                   addLine("📱 Requesting storage permissions from Android system...", 'output');
-                  addLine("✅ Storage access granted! CVJ Terminal can now access external storage", 'output');
-                  addLine("📁 You can now access /storage/shared/ and /storage/emulated/", 'output');
+                  const granted = await AndroidShell.requestStoragePermission();
+                  if (granted) {
+                    addLine("✅ Storage access granted! CVJ Terminal can now access external storage", 'output');
+                    const storageInfo = await AndroidShell.getStorageInfo();
+                    if (storageInfo) {
+                      addLine(`📁 External storage: ${storageInfo.sdcard}`, 'output');
+                      addLine(`📁 Home directory: ${storageInfo.app.home}`, 'output');
+                    }
+                  } else {
+                    addLine("❌ Storage permission denied. Please grant permission in Android settings.", 'error');
+                  }
                 } else {
                   addLine("🌐 Web mode: Storage access simulation enabled", 'output');
                   addLine("✅ CVJ Terminal storage setup complete", 'output');
                 }
               } catch (error) {
                 addLine(`❌ Storage setup failed: ${error}`, 'error');
+              }
+              break;
+
+            case 'linux':
+              try {
+                addLine("🔧 Setting up Linux environment...", 'output');
+                const linuxResult = await AndroidShell.setupLinuxEnvironment();
+                if (linuxResult.exitCode === 0) {
+                  addLine("✅ Linux environment created successfully!", 'output');
+                  if (linuxResult.linuxRoot) {
+                    addLine(`📁 Linux root: ${linuxResult.linuxRoot}`, 'output');
+                  }
+                  if (linuxResult.home) {
+                    addLine(`🏠 Home directory: ${linuxResult.home}`, 'output');
+                  }
+                } else {
+                  addLine(`❌ Linux setup failed: ${linuxResult.error}`, 'error');
+                }
+              } catch (error) {
+                addLine(`❌ Linux setup failed: ${error}`, 'error');
+              }
+              break;
+
+            case 'info':
+              try {
+                addLine("📊 System Information", 'output');
+                if (Capacitor.isNativePlatform()) {
+                  const sysInfo = await AndroidShell.getSystemInfo();
+                  if (sysInfo) {
+                    addLine(`  Device: ${sysInfo.manufacturer} ${sysInfo.model}`, 'output');
+                    addLine(`  Android: ${sysInfo.androidVersion} (SDK ${sysInfo.sdkVersion})`, 'output');
+                    addLine(`  CPU: ${sysInfo.supportedAbis}`, 'output');
+                    addLine(`  Memory: ${Math.round(sysInfo.totalMemory / 1024 / 1024)}MB total`, 'output');
+                    addLine(`  Home: ${sysInfo.homeDirectory}`, 'output');
+                    addLine(`  Storage: ${sysInfo.externalStorage}`, 'output');
+                    
+                    const hasRoot = await AndroidShell.checkRootAccess();
+                    addLine(`  Root: ${hasRoot ? '✅ Available' : '❌ Not available'}`, 'output');
+                  }
+                } else {
+                  addLine("  Platform: Web Browser", 'output');
+                  addLine("  Mode: Simulation", 'output');
+                  addLine("  Build Android app for native access", 'output');
+                }
+              } catch (error) {
+                addLine(`❌ Error getting system info: ${error}`, 'error');
               }
               break;
             
