@@ -165,7 +165,11 @@ const TerminalWindow = ({ onClose }: TerminalWindowProps) => {
       case 'nmap': 
         const nmapResult = await securityTools.runScan('nmap', '', args);
         return { output: nmapResult, error: '', exitCode: 0 };
-      case 'netstat': return { output: 'Active Internet connections\nProto Recv-Q Send-Q Local Address           Foreign Address         State\ntcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN', error: '', exitCode: 0 };
+      case 'ping': return await unixCommands.ping(args);
+      case 'netcheck': return await unixCommands.netcheck();
+      case 'netstat': return await unixCommands.netstat(args);
+      case 'ifconfig': return await unixCommands.ifconfig(args);
+      case 'nslookup': return await unixCommands.nslookup(args);
       default:
         return { output: '', error: `bash: ${cmd}: command not found`, exitCode: 127 };
     }

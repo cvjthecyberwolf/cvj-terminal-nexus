@@ -1,4 +1,5 @@
 import { OSInstance } from './osManager';
+import { Capacitor } from '@capacitor/core';
 
 export interface NetworkInterface {
   name: string;
@@ -23,13 +24,23 @@ export interface NetworkConnection {
   createdAt: Date;
 }
 
+export interface ConnectivityStatus {
+  online: boolean;
+  type: 'wifi' | 'cellular' | 'ethernet' | 'unknown' | 'none';
+  effectiveType?: 'slow-2g' | '2g' | '3g' | '4g';
+  downlink?: number;
+  rtt?: number;
+}
+
 export class NetworkManager {
   private interfaces: Map<string, NetworkInterface[]> = new Map();
   private connections: NetworkConnection[] = [];
   private virtualNetwork = '192.168.100';
+  private onlineListeners: ((status: ConnectivityStatus) => void)[] = [];
 
   constructor() {
     this.initializeDefaultInterfaces();
+    this.setupConnectivityListeners();
   }
 
   private initializeDefaultInterfaces(): void {
@@ -55,6 +66,88 @@ export class NetworkManager {
         mtu: 65536
       }
     ]);
+  }
+
+  private setupConnectivityListeners(): void {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', () => {
+        this.notifyConnectivityChange();
+      });
+      window.addEventListener('offline', () => {
+        this.notifyConnectivityChange();
+      });
+    }
+  }
+
+  private notifyConnectivityChange(): void {
+    const status = this.getConnectivityStatus();
+    this.onlineListeners.forEach(listener => listener(status));
+  }
+
+  // Get real network connectivity status
+  getConnectivityStatus(): ConnectivityStatus {
+    if (typeof navigator === 'undefined') {
+      return { online: false, type: 'none' };
+    }
+
+    const online = navigator.onLine;
+    
+    // Get connection info if available
+    const connection = (navigator as any).connection || 
+                       (navigator as any).mozConnection || 
+                       (navigator as any).webkitConnection;
+
+    if (connection) {
+      return {
+        online,
+        type: this.mapConnectionType(connection.type),
+        effectiveType: connection.effectiveType,
+        downlink: connection.downlink,
+        rtt: connection.rtt
+      };
+    }
+
+    return {
+      online,
+      type: online ? 'unknown' : 'none'
+    };
+  }
+
+  private mapConnectionType(type: string): ConnectivityStatus['type'] {
+    switch (type) {
+      case 'wifi': return 'wifi';
+      case 'cellular': return 'cellular';
+      case 'ethernet': return 'ethernet';
+      case 'none': return 'none';
+      default: return 'unknown';
+    }
+  }
+
+  // Check if online with actual network request
+  async checkRealConnectivity(): Promise<boolean> {
+    try {
+      // Try to fetch a small resource to verify real connectivity
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch('https://www.google.com/favicon.ico', {
+        method: 'HEAD',
+        mode: 'no-cors',
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  onConnectivityChange(callback: (status: ConnectivityStatus) => void): () => void {
+    this.onlineListeners.push(callback);
+    return () => {
+      this.onlineListeners = this.onlineListeners.filter(l => l !== callback);
+    };
   }
 
   createInstanceNetwork(instance: OSInstance): NetworkInterface[] {
@@ -87,18 +180,16 @@ export class NetworkManager {
   }
 
   private generateInstanceIP(instanceId: string): string {
-    // Generate IP based on instance ID hash
     const hash = instanceId.split('').reduce((a, b) => {
       a = ((a << 5) - a) + b.charCodeAt(0);
       return a & a;
     }, 0);
     
-    const lastOctet = Math.abs(hash % 254) + 2; // 2-255
+    const lastOctet = Math.abs(hash % 254) + 2;
     return `${this.virtualNetwork}.${lastOctet}`;
   }
 
   private generateMAC(instanceId: string): string {
-    // Generate MAC based on instance ID
     const hash = instanceId.split('').reduce((a, b) => {
       a = ((a << 5) - a) + b.charCodeAt(0);
       return a & a;
@@ -127,49 +218,119 @@ export class NetworkManager {
     return this.interfaces.get(instanceId) || [];
   }
 
-  async ping(sourceId: string, targetIP: string): Promise<{
+  // Real ping using fetch timing for web, or native for Android
+  async ping(sourceId: string, targetIP: string, count: number = 4): Promise<{
     success: boolean;
-    time: number;
+    times: number[];
     output: string;
   }> {
-    const sourceInterfaces = this.interfaces.get(sourceId);
-    if (!sourceInterfaces || sourceInterfaces.length === 0) {
+    // First check if we're online at all
+    const connectivity = this.getConnectivityStatus();
+    if (!connectivity.online) {
       return {
         success: false,
-        time: 0,
-        output: 'Network unreachable: No network interface'
+        times: [],
+        output: `ping: ${targetIP}: Network is unreachable`
       };
     }
 
-    // Simulate ping
-    const time = Math.random() * 50 + 1; // 1-51ms
-    const success = Math.random() > 0.05; // 95% success rate
+    // Determine target URL for ping simulation
+    let targetUrl = this.resolveTargetUrl(targetIP);
+    
+    const times: number[] = [];
+    const results: string[] = [];
+    let successCount = 0;
 
-    if (success) {
-      return {
-        success: true,
-        time: Math.round(time * 100) / 100,
-        output: `PING ${targetIP}: 56 data bytes
-64 bytes from ${targetIP}: icmp_seq=1 ttl=64 time=${time.toFixed(1)} ms
-64 bytes from ${targetIP}: icmp_seq=2 ttl=64 time=${(time + Math.random() * 2).toFixed(1)} ms
-64 bytes from ${targetIP}: icmp_seq=3 ttl=64 time=${(time + Math.random() * 3).toFixed(1)} ms
+    results.push(`PING ${targetIP} (${targetIP}): 56 data bytes`);
 
---- ${targetIP} ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss
-round-trip min/avg/max/stddev = ${(time - 1).toFixed(1)}/${time.toFixed(1)}/${(time + 3).toFixed(1)}/1.247 ms`
-      };
-    } else {
-      return {
-        success: false,
-        time: 0,
-        output: `PING ${targetIP}: 56 data bytes
-Request timeout for icmp_seq 1
-Request timeout for icmp_seq 2
-Request timeout for icmp_seq 3
+    for (let i = 0; i < count; i++) {
+      const pingResult = await this.performSinglePing(targetUrl, i + 1);
+      if (pingResult.success) {
+        times.push(pingResult.time);
+        successCount++;
+        results.push(`64 bytes from ${targetIP}: icmp_seq=${i + 1} ttl=64 time=${pingResult.time.toFixed(1)} ms`);
+      } else {
+        results.push(`Request timeout for icmp_seq ${i + 1}`);
+      }
+      
+      // Small delay between pings
+      if (i < count - 1) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
 
---- ${targetIP} ping statistics ---
-3 packets transmitted, 0 received, 100% packet loss`
-      };
+    const packetLoss = Math.round(((count - successCount) / count) * 100);
+    results.push('');
+    results.push(`--- ${targetIP} ping statistics ---`);
+    results.push(`${count} packets transmitted, ${successCount} received, ${packetLoss}% packet loss`);
+
+    if (times.length > 0) {
+      const minTime = Math.min(...times);
+      const maxTime = Math.max(...times);
+      const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
+      const variance = times.reduce((a, b) => a + Math.pow(b - avgTime, 2), 0) / times.length;
+      const stddev = Math.sqrt(variance);
+      results.push(`round-trip min/avg/max/stddev = ${minTime.toFixed(3)}/${avgTime.toFixed(3)}/${maxTime.toFixed(3)}/${stddev.toFixed(3)} ms`);
+    }
+
+    return {
+      success: successCount > 0,
+      times,
+      output: results.join('\n')
+    };
+  }
+
+  private resolveTargetUrl(target: string): string {
+    // Handle common domain names
+    const domainMappings: Record<string, string> = {
+      'google.com': 'https://www.google.com/favicon.ico',
+      'www.google.com': 'https://www.google.com/favicon.ico',
+      '8.8.8.8': 'https://dns.google/',
+      '8.8.4.4': 'https://dns.google/',
+      '1.1.1.1': 'https://1.1.1.1/',
+      'cloudflare.com': 'https://www.cloudflare.com/favicon.ico',
+      'github.com': 'https://github.com/favicon.ico',
+      'stackoverflow.com': 'https://stackoverflow.com/favicon.ico',
+      'amazon.com': 'https://www.amazon.com/favicon.ico',
+      'facebook.com': 'https://www.facebook.com/favicon.ico',
+      'twitter.com': 'https://twitter.com/favicon.ico',
+      'x.com': 'https://x.com/favicon.ico',
+    };
+
+    // Check for direct mapping
+    const lowerTarget = target.toLowerCase();
+    if (domainMappings[lowerTarget]) {
+      return domainMappings[lowerTarget];
+    }
+
+    // If it looks like a domain, try to construct a URL
+    if (target.includes('.') && !target.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+      return `https://${target}/favicon.ico`;
+    }
+
+    // For IP addresses, try common HTTP
+    return `http://${target}/`;
+  }
+
+  private async performSinglePing(url: string, seq: number): Promise<{ success: boolean; time: number }> {
+    const startTime = performance.now();
+    
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+      await fetch(url, {
+        method: 'HEAD',
+        mode: 'no-cors',
+        cache: 'no-store',
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+      const endTime = performance.now();
+      return { success: true, time: endTime - startTime };
+    } catch (error) {
+      return { success: false, time: 0 };
     }
   }
 
@@ -204,7 +365,12 @@ Request timeout for icmp_seq 3
     service?: string;
     version?: string;
   }> {
-    // Simulate port scanning
+    // First check connectivity
+    const connectivity = this.getConnectivityStatus();
+    if (!connectivity.online) {
+      return { open: false };
+    }
+
     const commonPorts: Record<number, { service: string; version?: string }> = {
       22: { service: 'ssh', version: 'OpenSSH 8.9' },
       80: { service: 'http', version: 'nginx/1.18.0' },
@@ -215,8 +381,30 @@ Request timeout for icmp_seq 3
       8080: { service: 'http-alt', version: 'Jetty 9.4' }
     };
 
-    const isOpen = Math.random() > 0.7; // 30% chance port is open
+    // Try to actually connect for common web ports
+    if (port === 80 || port === 443 || port === 8080) {
+      try {
+        const protocol = port === 443 ? 'https' : 'http';
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+        await fetch(`${protocol}://${targetIP}:${port}/`, {
+          method: 'HEAD',
+          mode: 'no-cors',
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+        const serviceInfo = commonPorts[port];
+        return { open: true, ...serviceInfo };
+      } catch {
+        return { open: false };
+      }
+    }
+
+    // For other ports, simulate based on common ports
     const serviceInfo = commonPorts[port];
+    const isOpen = Math.random() > 0.7;
 
     return {
       open: isOpen && !!serviceInfo,

@@ -1,4 +1,4 @@
-import { forwardRef, ReactNode, useImperativeHandle, useMemo, useRef, useState, lazy, Suspense } from "react";
+import { forwardRef, ReactNode, useImperativeHandle, useMemo, useRef, useState, lazy, Suspense, useCallback } from "react";
 import DesktopWindow from "./DesktopWindow";
 import TerminalWindow from "@/components/TerminalWindow";
 import BrowserWindow from "./BrowserWindow";
@@ -10,6 +10,7 @@ import VirtualMachineWindow from "./VirtualMachineWindow";
 import OSLauncherWindow from "./OSLauncherWindow";
 import CyberJungleWindow from "./CyberJungleWindow";
 import { Terminal, Globe, Package, Network, Shield, Bot, HardDrive, Zap, Monitor, Sparkles } from "lucide-react";
+import { windowSounds, playGenericWindowSound } from "@/lib/audioEffects";
 
 const RealVMWindow = lazy(() => import('./RealVMWindow'));
 
@@ -47,6 +48,16 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
   const [windows, setWindows] = useState<WindowItem[]>([]);
   const zCounter = useRef(30);
 
+  // Play sound for window type
+  const playWindowSound = useCallback((type: WindowType) => {
+    try {
+      const soundFn = windowSounds[type] || playGenericWindowSound;
+      soundFn();
+    } catch (e) {
+      console.warn('Audio playback failed:', e);
+    }
+  }, []);
+
   const focus = (id: string) => {
     setWindows((prev) => {
       const maxZ = ++zCounter.current;
@@ -64,10 +75,12 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
 
   useImperativeHandle(ref, () => ({
     openTerminal: () => {
+      playWindowSound("terminal");
       const id = `term-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [...prev, { id, type: "terminal", title: "Terminal", icon: <Terminal className="w-4 h-4" />, z: ++zCounter.current }]);
     },
     openBrowser: (url: string, title = "Web Browser") => {
+      playWindowSound("browser");
       const id = `web-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [
         ...prev,
@@ -82,34 +95,42 @@ const WindowManager = forwardRef<WindowManagerHandle>((_, ref) => {
       ]);
     },
     openPackageManager: () => {
+      playWindowSound("packageManager");
       const id = `pkg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [...prev, { id, type: "packageManager", title: "Package Manager", icon: <Package className="w-4 h-4" />, z: ++zCounter.current }]);
     },
     openNetworkTools: () => {
+      playWindowSound("networkTools");
       const id = `net-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [...prev, { id, type: "networkTools", title: "Network Tools", icon: <Network className="w-4 h-4" />, z: ++zCounter.current }]);
     },
     openSecurityTools: () => {
+      playWindowSound("securityTools");
       const id = `sec-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [...prev, { id, type: "securityTools", title: "Security Tools", icon: <Shield className="w-4 h-4" />, z: ++zCounter.current }]);
     },
     openBotManager: () => {
+      playWindowSound("botManager");
       const id = `bot-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [...prev, { id, type: "botManager", title: "Bot Manager", icon: <Bot className="w-4 h-4" />, z: ++zCounter.current }]);
     },
     openVirtualMachine: () => {
+      playWindowSound("virtualMachine");
       const id = `vm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [...prev, { id, type: "virtualMachine", title: "Virtual Machines", icon: <HardDrive className="w-4 h-4" />, z: ++zCounter.current }]);
     },
     openRealVirtualMachine: () => {
+      playWindowSound("realVirtualMachine");
       const id = `rvm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [...prev, { id, type: "realVirtualMachine", title: "Real VM Manager", icon: <Monitor className="w-4 h-4" />, z: ++zCounter.current }]);
     },
     openOSLauncher: () => {
+      playWindowSound("osLauncher");
       const id = `os-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [...prev, { id, type: "osLauncher", title: "Hybrid OS Launcher", icon: <Zap className="w-4 h-4" />, z: ++zCounter.current }]);
     },
     openCyberJungle: () => {
+      playWindowSound("cyberJungle");
       const id = `cj-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       setWindows((prev) => [...prev, { id, type: "cyberJungle", title: "Cyber Jungle - AI Dev Environment", icon: <Sparkles className="w-4 h-4" />, z: ++zCounter.current }]);
     },
